@@ -12,5 +12,10 @@ This document contains info regarding the status, issues etc. of our ground robo
 ## 003
 
 
-## 002
+## 004
 - 2024/07/24: seems to turn slightly to the right when trying to run a straight line in the sample code
+
+## 005
+- 2024/08/01: seems to turn slightly to the right when trying to run a straight line in the sample code
+
+## 006
