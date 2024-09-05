@@ -12,6 +12,7 @@ rob = Robot()
 buffer= bytearray(1)
 pir = Pin(29)
 uart0 = UART(0, baudrate=9600, tx=Pin(28), rx=Pin(29), bits=8, parity=None, stop=1,rxbuf=1000)
+
 def handle_interrupt(pin):
     global flag
     flag = True
@@ -22,10 +23,11 @@ def handle_interrupt(pin):
     global interrupt_pin
     interrupt_pin = pin
     #uart0.flush()
+
 traj_list = ["line","rotation","curve"]
 flag = False
 while not flag:
-    1
+    pass
 
 traj = "/trajectories/" + traj_list[buffer[0]] + ".json"
 print(traj)
@@ -61,3 +63,14 @@ rob.state_estimator.display_state()
 rob.state_estimator.start(False)
 rob.state_estimator.write_states_to_json(gains=gains, traj=traj)
 print("finished")
+
+
+"""
+Initialization
+Movement Loop:
+    wait for message 
+    decode message
+    drive
+
+
+"""
