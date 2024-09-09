@@ -10,8 +10,9 @@ from J_robot import Robot
 from pololu_3pi_2040_robot import robot as three_pi_rob
 rob = Robot()
 buffer= bytearray(1)
-pir = Pin(29)
+pin = Pin(29)
 uart0 = UART(0, baudrate=9600, tx=Pin(28), rx=Pin(29), bits=8, parity=None, stop=1,rxbuf=1000)
+
 
 def handle_interrupt(pin):
     global flag
@@ -23,6 +24,9 @@ def handle_interrupt(pin):
     global interrupt_pin
     interrupt_pin = pin
     #uart0.flush()
+
+pin.irq(handler=handle_interrupt, trigger=Pin.IRQ_RISING, hard=True)
+
 
 traj_list = ["line","rotation","curve"]
 flag = False
