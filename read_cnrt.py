@@ -63,6 +63,7 @@ class Control():
         DO I have to calculate the real ones or do they come from the camera 
         Do I only get actions for the movent or also desired states 
             Does this work with the Communication Protocoll ?
+        When do I stop
         
         """
 
