@@ -9,7 +9,7 @@ class State_Estimator():
     def __init__(self, robot): 
         self.state = [0,0,0]   # [x, y, theta(radians)]
         self.theta_easy = 0 #theta for dummies : in degrees, from -180 to +180
-        self.starttime= None # Not cool because you cant subtract  variables of type None
+        self.starttime = 0 # Not cool because you cant subtract  variables of type None
         self.last_estimation = 0 #time of the last state estimation (in regards to starttime)
         self.last_oR = robot.encoders.get_counts()[0] #last value given by the right quadrature encoder (odometry sensor)
         self.last_oL = robot.encoders.get_counts()[1] #last value given by the left quadrature encoder (odometry sensor)
@@ -39,7 +39,7 @@ class State_Estimator():
         currtime = time.time_ns()
         
         #if first call of state estimation, return [0,0,0]
-        if self.starttime == None:
+        if self.starttime == 0:
             self.starttime = currtime
             self.last_estimation = 0
             self.state = [0.,0.,0.]
