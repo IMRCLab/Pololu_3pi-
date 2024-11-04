@@ -27,7 +27,7 @@ while True:
     if flag:
         print(buffer)
         value1 = struct.unpack('<f',buffer[-4:])[0]
-        value2 = struct.unpack('<f',buffer[-8:-4])[0]
-        value3 = struct.unpack('<f',buffer[-12:-8])[0]
-        print(f"value3:{value3}, value2:{value2},value1:{value1}")
+        value2 = struct.unpack('<f',buffer[-9:-5])[0]
+        value3 = struct.unpack('<f',buffer[-13:-9])[0]
+        print(f"value3:{value3} : {buffer[-13:-9]}, value2:{value2} ; {buffer[-9:-5]},value1:{value1} : {buffer[-4:]}")
         flag = False
