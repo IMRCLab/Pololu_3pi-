@@ -8,6 +8,7 @@ class Quaternion():
         self._y = self._quaternion[1]
         self._z = self._quaternion[2]
         self._w = self._quaternion[3]
+        self._rotational_matrix = self.rotational_matrix()
 
     @property
     def x(self):
@@ -28,6 +29,10 @@ class Quaternion():
     @property
     def quaternion(self):
         return self._quaternion
+    
+    @property
+    def rotational_matrix(self):
+        return self._rotational_matrix
 
     def quatdecompress(self,comp):
         q = [0,0,0,0]
@@ -45,3 +50,15 @@ class Quaternion():
                 sum_squares += q[i] * q[i]
         q[i_largest] = math.sqrt(1.0 - sum_squares)
         return q 
+    
+    def rotational_matrix(self):
+        x = self._x
+        y = self._y
+        z = self._z
+        w = self._w
+        # for the quaternion q = w +xi +yj +zk
+        self._rotational_matrix = [
+        [1 - 2*y**2 - 2*z**2, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
+        [2*x*y + 2*w*z, 1 - 2*x**2 - 2*z**2, 2*y*z - 2*w*x],
+        [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x**2 - 2*y**2]
+        ]
