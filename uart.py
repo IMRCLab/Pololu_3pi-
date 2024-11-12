@@ -10,8 +10,8 @@ class Uart():
         self.uart =  UART(0,baudrate = baudrate, tx=Pin(txPin),rx=Pin(rxPin),bits = bits, parity= parity,stop=stop,rxbuf=rxbuf)
         self.list_receive = Queue()
         self.list_decode = Queue()
-        self.read = asyncio.create_task(self.read_uart)
-        self.decode = asyncio.create_task(self.decode_uart)
+        self.read = asyncio.create_task(self.read_uart())
+        self.decode = asyncio.create_task(self.decode_uart())
     
     async def read_uart(self):
         await asyncio.sleep(1)
@@ -31,7 +31,7 @@ class Uart():
                 x = struct.unpack('<h',buffer[3:5])
                 y = struct.unpack('<h',buffer[5:7])
                 z = struct.unpack('<h',buffer[7:9])
-                quaternion = Quaternion(int.from_bytes(buffer[9:], byteorder='little'))
+                quaternion = Quaternion(int.from_bytes(buffer[9:13], 'little'))
                 self.list_decode.put_nowait([x,y,z,quaternion])
             elif buffer[0] == 2:
                 print("2")
