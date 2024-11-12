@@ -3,13 +3,11 @@ import struct
 
 class Quaternion():
     def __init__(self,comp:int) -> None:
-        self._quaternion = self.quatdecompress(comp)
-        self._x = self._quaternion[0]
-        self._y = self._quaternion[1]
-        self._z = self._quaternion[2]
-        self._w = self._quaternion[3]
-        self._rotational_matrix = self.rotational_matrix()
-
+        self._x, self._y, self._z, self._w = self.quatdecompress(comp)
+        self._roll = math.atan2(2*(self._w*self._x+self._y*self._z),1-2*(self._x**2+self._y**2))
+        self._pitch = -math.pi/2 +math.atan2(math.sqrt(1+2*(self._w*self._y-self._x*self._z)),math.sqrt(1-2*(self._w*self._y-self._x*self._z)))
+        self._yaw = math.atan2(2*(self._w*self._z+self._x*self._y),1-2*(self._y**2+self._z**2))
+    
     @property
     def x(self):
         return self._x
@@ -27,12 +25,17 @@ class Quaternion():
         return self._w
     
     @property
-    def quaternion(self):
-        return self._quaternion
-    
+    def roll(self):
+        return self._roll
+
     @property
-    def rotational_matrix(self):
-        return self._rotational_matrix
+    def pitch(self):
+        return self._pitch
+
+    @property
+    def yaw(self):
+        return self._yaw
+    
 
     def quatdecompress(self,comp):
         q = [0,0,0,0]
@@ -51,13 +54,13 @@ class Quaternion():
         q[i_largest] = math.sqrt(1.0 - sum_squares)
         return q 
     
-    def rotational_matrix(self):
+    def calc_rotational_matrix(self)-> list:
         x = self._x
         y = self._y
         z = self._z
         w = self._w
         # for the quaternion q = w +xi +yj +zk
-        self._rotational_matrix = [
+        return [
         [1 - 2*y**2 - 2*z**2, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
         [2*x*y + 2*w*z, 1 - 2*x**2 - 2*z**2, 2*y*z - 2*w*x],
         [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x**2 - 2*y**2]
