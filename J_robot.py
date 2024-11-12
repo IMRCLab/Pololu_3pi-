@@ -52,12 +52,12 @@ class Robot():
         theta = self.state_estimator.theta_easy
         t = self.state_estimator.last_estimation - self.state_estimator.starttime
         to_display = [f"x: {x}", f"y: {y}", f"deg: {theta}", f"rad: {rad} ",f"t {t / (10**9)}"]
-        displaylist(to_display)
+        self.displaylist(to_display)
 
     
     def set_gains(self) -> tuple:
-        gains = [1,1,1]
-        gain_nr = 0 #0 = Kx, 1 = Ky, 2 = Ktheta
+        gains = [1.0,1.0,1.0]
+        gain_nr = 0.0 #0 = Kx, 1 = Ky, 2 = Ktheta
         which_gain = {0:'K_x', 1:'K_y', 2:'K_theta'}
         power = 0
         increment = 0.1
@@ -75,8 +75,8 @@ class Robot():
                 gain_nr = (gain_nr + 1) % 3
                 
             display.fill(0)
-            display.text(f"Tuning {which_gain[gain_nr]}", 0, 0)
-            display.text("value: " + str(gains[gain_nr]), 0, 8)
+            display.text(f"Tuning {which_gain[int(gain_nr)]}", 0, 0)
+            display.text("value: " + str(gains[int(gain_nr)]), 0, 8)
             display.text(f"increment {increment}", 0,16)
             display.text(f"A: +   B: - ",0,24)
             display.text(f"C: incrementx10",0,32)
@@ -85,9 +85,9 @@ class Robot():
             display.text(f"Right: change K",0,56)
 
             if button_a.check():
-                gains[gain_nr] += 1 * increment
+                gains[int(gain_nr)] += 1 * increment
             if button_b.check():
-                gains[gain_nr] -= 1 * increment
+                gains[int(gain_nr)] -= 1 * increment
             if button_c.check():
                 power = ((power + 1) % 5)   #that way we can go 10^-1 to 10^3
                 increment = 10**(power-1)
