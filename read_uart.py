@@ -12,7 +12,8 @@ Future Plans
 import struct
 from machine import Timer, UART, Pin
 import uasyncio as asyncio
-import micropython, copy
+import micropython
+import time
 #Buffer for interrupt error messages
 micropython.alloc_emergency_exception_buf(100) 
 
@@ -24,7 +25,6 @@ buffer= bytearray(16) #TODO change chack tp 32
 pin = Pin(29)
 uart0 = UART(0, baudrate=9600, tx=Pin(28), rx=Pin(29), bits=8, parity=None, stop=1,rxbuf=1000)
 flag=True
-
 """
 Keep the code as short and simple as possible.
 Avoid memory allocation: no appending to lists or insertion into dictionaries, no floating point.

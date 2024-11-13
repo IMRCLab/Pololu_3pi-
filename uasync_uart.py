@@ -2,6 +2,8 @@ import struct
 from machine import Timer, UART, Pin
 import uasyncio as asyncio
 import micropython
+from quaternion import Quaternion
+from uart import Uart
 
 tsf = asyncio.ThreadSafeFlag()
 buffer= bytearray(16) #TODO change chack tp 32
@@ -32,8 +34,8 @@ async def decode_message():
     await asyncio.sleep(1)
     while True:
         await asyncio.sleep(0)
-        if flag_received:
-            if buffer[0] == 1:
+        if flag_received: #TODO Add cases for diffrent Messages 
+            if buffer[0] == 0x6d and buffer[1] == 0x09:
                 print("1")
                 pass
             elif buffer[0] == 2:
