@@ -74,7 +74,7 @@ class Control():
             u_L, u_R = self._robot.angular_speed_to_motor_speed(u_L), self._robot.angular_speed_to_motor_speed(u_R)
             self._robot.motors.set_speeds(u_L, u_R)
             await asyncio.sleep(0)
-"""
+
 from uart import Uart
 async def main():
     rob = Robot()
@@ -83,9 +83,9 @@ async def main():
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
-    gains = tuple([1.0,3.0,3.0])
+    gains = tuple((1.0,3.0,3.0))
     data_queue = Queue()
-    connection = Uart(queue_decode=data_queue,baudrate=115200*4)
+    connection = Uart(queue_decode=data_queue,baudrate=115200)
     control = Control(robot=rob,start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(0)
@@ -93,4 +93,3 @@ async def main():
 
         
 asyncio.run(main())
-"""

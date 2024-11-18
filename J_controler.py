@@ -70,7 +70,7 @@ ctrl_actions = data["result"][0]["actions"]
 print(len(states), " ", states)
 print(len(ctrl_actions), " ", ctrl_actions)
 time.sleep(0.5)
-gains = rob.set_gains()
+gains = tuple((1.0,3.0,3.0))
 print(gains)
 time.sleep(1)
 rob.state_estimator.start(True)

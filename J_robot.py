@@ -102,6 +102,7 @@ class Robot():
     def choose_traj(self):
         display = three_pi_rob.Display()
         bump_sensors = three_pi_rob.BumpSensors()
+        button_b = three_pi_rob.ButtonB()
         button_a = three_pi_rob.ButtonA()
         bump_sensors.calibrate()
         
@@ -109,19 +110,19 @@ class Robot():
         traj_list = ["line","rotation","curve"]
         while True:
             bump_sensors.read()
-            if bump_sensors.right.check():
+            if button_a.check():
                 index = (index + 1) % 3
                 display.fill(0)
                 print(index)
-            if button_a.check(): 
+            if button_b.check(): 
                 print(index)
                 return "/trajectories/" + traj_list[index] + ".json"
             display.text(f"Choose traj", 0, 0)
             display.text("StraightLine", 0, 16)
             display.text(f"rotation", 0,24)
             display.text(f"Curve",0,32)  
-            display.text(f"R_Bumper: change", 0,48)
-            display.text(f"A : select",0,56)
+            display.text(f"A: change", 0,48)
+            display.text(f"B : select",0,56)
             display.text("<-", 100, (index+2)*8)
             display.show()
             
