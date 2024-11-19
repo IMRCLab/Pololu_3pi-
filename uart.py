@@ -4,10 +4,13 @@ import uasyncio as asyncio
 import micropython
 from primitives.queue import Queue, QueueEmpty
 from quaternion import Quaternion
+from asyncio import Event
+
 
 class Uart():
-    def __init__(self,queue_decode:Queue, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
+    def __init__(self,event:Event, queue_decode:Queue, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
         self.uart =  UART(0,baudrate = baudrate, tx=Pin(txPin),rx=Pin(rxPin),bits = bits, parity= parity,stop=stop,rxbuf=rxbuf)
+        self.event = event
         self.queue_receive = Queue()
         self.queue_decode = queue_decode
         self.read = asyncio.create_task(self.read_uart())
@@ -33,9 +36,8 @@ class Uart():
                 z = struct.unpack('<h',buffer[7:9])[0]
                 quaternion = Quaternion(int.from_bytes(buffer[9:13], 'little'))
                 self.queue_decode.put_nowait([x,y,z,quaternion])
-            elif buffer[0] == 2:
-                print("2")
-                pass
+            elif buffer[0] == 2 and buffer[1] == 0x05:
+                self.event.set()
             else :
                 print("else")
                 pass

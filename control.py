@@ -6,12 +6,14 @@ from primitives.queue import Queue
 import time
 import json
 import uasyncio as asyncio
+from asyncio import Event
 
 
 
 class Control():
-    def __init__(self,robot:Robot, start_time:int, states_mocap:Queue, states:list, actions:list, gains:tuple) -> None:
+    def __init__(self,robot:Robot, event:Event, start_time:int, states_mocap:Queue, states:list, actions:list, gains:tuple) -> None:
         self._robot = robot
+        self.event = event
         self._start_time = start_time
         self._states_mocap = states_mocap
         self._states = states
@@ -21,6 +23,7 @@ class Control():
 
     async def control(self)-> None:
         await asyncio.sleep(1)
+        await self.event.wait()
         run = True
         index = 0
         while run: #TODO What happens if trajectory is done -> just stops right now 
@@ -85,8 +88,9 @@ async def main():
     ctrl_actions = data["result"][0]["actions"]
     gains = tuple((1.0,3.0,3.0))
     data_queue = Queue()
-    connection = Uart(queue_decode=data_queue,baudrate=115200)
-    control = Control(robot=rob,start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
+    start_event = Event()
+    connection = Uart(event=start_event,queue_decode=data_queue,baudrate=115200)
+    control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(0)
         message =  await connection.get_position()
