@@ -41,9 +41,12 @@ class Robot():
     def angular_speed_to_motor_speed(self, speed):
         increment = self.max_speed/6000 #increment is 7pi/600, approx 0.0367 [rad/s]
         level = speed // increment
-        if speed > 6000 :
+        if speed > 1000 :
             print("angular speed higher than maximum speed of the 3pi+ Hyper")
-            level = 6000
+            level = 1000
+        elif speed < -1000:
+            print("angular speed lower than minimum speed of the 3pi+ Hyper")
+            level = -1000
         return level
   
     #print info about the current state on the display
