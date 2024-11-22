@@ -16,7 +16,7 @@ class Robot():
         self.motors = three_pi_rob.Motors()
         self.display = three_pi_rob.Display()
         self.max_speed = 70*pi #max angular speed of the Hyper motors [rad/s]
-        
+        self.max_speed_level = 900
         self.state_estimator = State_Estimator(robot=self)
         
         
@@ -41,12 +41,12 @@ class Robot():
     def angular_speed_to_motor_speed(self, speed):
         increment = self.max_speed/6000 #increment is 7pi/600, approx 0.0367 [rad/s]
         level = speed // increment
-        if speed > 1000 :
+        if speed > self.max_speed_level :
             print("angular speed higher than maximum speed of the 3pi+ Hyper")
-            level = 1000
-        elif speed < -1000:
+            level = self.max_speed_level
+        elif speed < -self.max_speed_level:
             print("angular speed lower than minimum speed of the 3pi+ Hyper")
-            level = -1000
+            level = -self.max_speed_level
         return level
   
     #print info about the current state on the display

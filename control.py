@@ -39,7 +39,7 @@ class Control():
             print("y "+str(y))
             print("theta "+str(theta))
             print(t)
-            print(f"action i {index} ; state i {index+1}")
+            print(f"action i:{index} ; state i:{index+1}")
             
             #get desired state and velocities
             if index >= len(self._actions):
@@ -60,7 +60,7 @@ class Control():
             x_e = (x_d-x)*cos(theta) + (y_d - y)*sin(theta)
             y_e = -(x_d - x)*sin(theta) + (y_d - y)*cos(theta)
             theta_e = theta_d - theta
-            
+            print(f"Control Error: x:{x_e}, y:{y_e}, theta:{theta_e}")
             
             #compute unicycle-model control variables (forwards speed and rotational speed)
             v_ctrl = v_d*cos(theta_e) + self.K_x * x_e
@@ -82,7 +82,7 @@ from uart import Uart
 async def main():
     rob = Robot()
 
-    with open("/trajectories/" + "curve" + ".json") as f:
+    with open("/trajectories/" + "line" + ".json") as f:
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
@@ -92,8 +92,8 @@ async def main():
     connection = Uart(event=start_event,queue_decode=data_queue,baudrate=115200)
     control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
     while True:
-        await asyncio.sleep(0)
-        message =  await connection.get_position()
+        await asyncio.sleep(5)
+        rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
 
         
 asyncio.run(main())
