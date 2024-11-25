@@ -24,12 +24,14 @@ class Uart():
                 new_buffer = bytearray(32)
                 self.uart.readinto(new_buffer)
                 self.queue_receive.put_nowait(new_buffer) 
+                
 
     async def decode_uart(self):
         await asyncio.sleep(1)
         while True:
             await asyncio.sleep(0)
             buffer = await self.queue_receive.get()
+            print(f'Qsize Decode : {self.queue_decode.qsize()}')
             if buffer[0] == 0x6d and buffer[1] == 0x09: 
                 x = struct.unpack('<h',buffer[3:5])[0]
                 y = struct.unpack('<h',buffer[5:7])[0]

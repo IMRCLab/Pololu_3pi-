@@ -1,7 +1,7 @@
 from J_maths_module import *
 #from J_state_estimate_ticks import *
 from J_robot import *
-from math import atan2, sqrt, sin, cos
+from math import atan2, sqrt, sin, cos, pi
 from primitives.queue import Queue
 import time
 import json
@@ -18,12 +18,14 @@ class Control():
         self._states_mocap = states_mocap
         self._states = states
         self._actions = actions
+        self.threshold = 0.02
         self.K_x, self.K_y, self.K_theta = gains 
         self.controller = asyncio.create_task(self.control())
 
     async def control(self)-> None:
+        print('start control')
         await asyncio.sleep(1)
-        await self.event.wait()
+        #await self.event.wait()
         run = True
         index = 0
         while run: #TODO What happens if trajectory is done -> just stops right now 
@@ -32,9 +34,12 @@ class Control():
             t *= (10**-9)
             print(t)
             state = await self._states_mocap.get()
-            print(state)
+            #print(state)
             x,y,_,_ = state
+            x = x/1000
+            y = y/1000
             theta = state[3].yaw
+            theta = theta + math.pi/2
             print("x "+str(x))
             print("y "+str(y))
             print("theta "+str(theta))
@@ -51,8 +56,10 @@ class Control():
             await asyncio.sleep(0)
             #get desired state and velocities
             x_d, y_d, theta_d = self._states[index+1]
-            if abs(x_d -x) < 0.001 and abs(y_d -y) < 0.001 and abs(theta_d -theta) < 0.001:
+            print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}')
+            if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold:
                 index +=1
+                print(index)
             v_d, omega_d = self._actions[index]
 
             
@@ -93,7 +100,7 @@ async def main():
     control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(5)
-        rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
+        #rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
 
         
 asyncio.run(main())
