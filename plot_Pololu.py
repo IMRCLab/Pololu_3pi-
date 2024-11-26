@@ -13,7 +13,7 @@ import os
 
 def plot_trajectories():
 
-    with open("curve.json") as f:
+    with open("line.json") as f:
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]  
@@ -47,7 +47,7 @@ def plot_trajectories():
     with plt.xkcd():
         ###real###
 
-        with open("run12_46_29.json") as f:
+        with open("lin_17_44_25.json") as f:
             realdata = json.load(f)
             realstates = realdata["states"]
         
@@ -71,7 +71,7 @@ def plot_trajectories():
     
 def plot_individual(jsonfile, traj):
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
-    trajectory_file = "/media/julien/MicroPython/trajectories/" + traj
+    trajectory_file = "/media/polyblank/MicroPython/trajectories/" + traj
     with open(trajectory_file) as f:
         data = json.load(f)
     states = data["result"][0]['states']
@@ -293,5 +293,5 @@ def file_guard(pdf_name):
 
 if __name__ == "__main__":
     # plot_individual("/media/julien/MicroPython/logs/run0_0_23.json")
-    plot_all("/media/julien/MicroPython/logs")
+    plot_all("/media/polyblank/MicroPython/logs")
     # print(file_guard("1_1_1.pdf"))
