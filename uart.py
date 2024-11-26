@@ -8,13 +8,14 @@ from asyncio import Event
 
 
 class Uart():
-    def __init__(self,event:Event, message_decode:list, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
+    def __init__(self,first_message:Event,event:Event, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
         self.uart =  UART(0,baudrate = baudrate, tx=Pin(txPin),rx=Pin(rxPin),bits = bits, parity= parity,stop=stop,rxbuf=rxbuf)
         self.event = event
         self.queue_receive = Queue()
-        self.message_decode = message_decode
+        self.message_decode = tuple()
         self.read = asyncio.create_task(self.read_uart())
         self.decode = asyncio.create_task(self.decode_uart())
+        self.first_message = first_message
     
     async def read_uart(self):
         await asyncio.sleep(1)
@@ -30,7 +31,7 @@ class Uart():
                 self.read = asyncio.create_task(self.read_uart())
 
     async def decode_uart(self):
-        await asyncio.sleep(1)
+        await asyncio.sleep(1)        
         while True:
             try:
                 await asyncio.sleep(0.01)
@@ -40,15 +41,18 @@ class Uart():
                     y = struct.unpack('<h',buffer[5:7])[0]
                     z = struct.unpack('<h',buffer[7:9])[0]
                     quaternion = Quaternion(int.from_bytes(buffer[9:13], 'little'))
-                    self.message_decode=[x,y,z,quaternion]
+                    self.message_decode=(x,y,z,quaternion)
                 elif buffer[0] == 2 and buffer[1] == 0x05:
                     self.event.set()
                 else :
                     print("else")
                     pass
+                if not self.first_message.is_set():
+                        self.first_message.set()
+                        print('Flag set')
             except:
                 print("MemoryError : Decode")        
                 self.decode = asyncio.create_task(self.decode_uart())
 
-    async def get_position(self) : # TODO: Add return type 
+    def get_position(self) : # TODO: Add return type 
         return self.message_decode
