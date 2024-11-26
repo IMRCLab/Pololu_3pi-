@@ -96,10 +96,10 @@ async def main():
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
     gains = tuple((1.0,3.0,3.0))
-    data_queue = Queue()
+    data_message = list()
     start_event = Event()
-    connection = Uart(event=start_event,queue_decode=data_queue,baudrate=115200)
-    control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
+    connection = Uart(event=start_event,message_decode=data_message,baudrate=115200)
+    control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_message,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(10)
         print('Collectiong Garbage')

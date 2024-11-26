@@ -51,4 +51,4 @@ class Uart():
                 self.decode = asyncio.create_task(self.decode_uart())
 
     async def get_position(self) : # TODO: Add return type 
-        return await self.queue_decode.get()
+        return self.message_decode
