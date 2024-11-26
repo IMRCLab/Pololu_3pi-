@@ -87,6 +87,7 @@ def plot_individual(jsonfile, traj):
     theta_desired = np.array([state[2] for state in states])
     #the planner has a timestep of 0.1s, so we need a time array like such [0, 0.1, 0.2, ..... len(states)*0.1]
     time = np.arange(0, len(states)) * 0.1 #create an array of the same size as desired states with 0.1 interva between each value
+    #time = np.array([state[3] for state in states])
     v_desired = np.array([action[0] for action in ctrl_actions])
     omega_desired = np.array([action[1] for action in ctrl_actions])
 
@@ -101,7 +102,7 @@ def plot_individual(jsonfile, traj):
     realy = np.array([state[1] for state in realstates])
     realtheta = np.array([state[2] for state in realstates])
     realtime = np.array([state[3] for state in realstates])
-    realtime = realtime * (10**(-9))
+    realtime = realtime# * (10**(-9))
     realv = np.array([action[0] for action in real_ctrl_actions])
     realomega = np.array([action[1] for action in real_ctrl_actions])
 

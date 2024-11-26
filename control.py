@@ -40,7 +40,6 @@ class Control():
                 t *= (10**-9)
                 print(t)
                 state = self._states_mocap.get_position()
-                print(state)
                 #print(state)
                 x,y,_,_ = state
                 x = x/1000
@@ -87,8 +86,7 @@ class Control():
                 self._robot.state_estimator.last_v_ctrl = v_ctrl
                 self._robot.state_estimator.last_omega_ctrl = omega_ctrl
 
-                self._robot.state_estimator.past_states.append([x, y, theta, t])
-                self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])
+                
                 
                 #transform unicycle-model variables v_ctrl and omega_ctrl to differential-drive
                 #model control variables (angular speed of wheels) 
@@ -100,6 +98,9 @@ class Control():
                 await asyncio.sleep(0.00)
             except:
                 print('invalid message received')
+            if t % 0.1 < 0.01:
+                self._robot.state_estimator.past_states.append([x, y, theta, t])
+                self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])   
 
 from uart import Uart
 async def main():
@@ -116,9 +117,12 @@ async def main():
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(10)
+        print(rob.state_estimator.past_states)
+        print(rob.state_estimator.past_ctrl_actions)
         rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
         print('Collectiong Garbage')
         gc.collect()
+        
 
         
 asyncio.run(main())
