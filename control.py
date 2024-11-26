@@ -7,11 +7,12 @@ import time
 import json
 import uasyncio as asyncio
 from asyncio import Event
+import gc
 
 
 
 class Control():
-    def __init__(self,robot:Robot, event:Event, start_time:int, states_mocap:Queue, states:list, actions:list, gains:tuple) -> None:
+    def __init__(self,robot:Robot, event:Event, start_time:int, states_mocap:list, states:list, actions:list, gains:tuple) -> None:
         self._robot = robot
         self.event = event
         self._start_time = start_time
@@ -33,7 +34,7 @@ class Control():
             t = time.time_ns() - self._start_time
             t *= (10**-9)
             print(t)
-            state = await self._states_mocap.get()
+            state = self._states_mocap
             #print(state)
             x,y,_,_ = state
             x = x/1000
@@ -53,7 +54,7 @@ class Control():
                 run = False
                 break
             
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.0)
             #get desired state and velocities
             x_d, y_d, theta_d = self._states[index+1]
             print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}')
@@ -83,7 +84,8 @@ class Control():
             #transform [rad/s] speed to a value the motors can understand (0-6000)
             u_L, u_R = self._robot.angular_speed_to_motor_speed(u_L), self._robot.angular_speed_to_motor_speed(u_R)
             self._robot.motors.set_speeds(u_L, u_R)
-            await asyncio.sleep(0)
+            print(f'Free Memory {gc.mem_free()}')
+            await asyncio.sleep(0.01)
 
 from uart import Uart
 async def main():
@@ -99,7 +101,9 @@ async def main():
     connection = Uart(event=start_event,queue_decode=data_queue,baudrate=115200)
     control = Control(robot=rob, event=start_event, start_time=time.time_ns(),states_mocap=data_queue,states=states,actions=ctrl_actions,gains=gains)
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(10)
+        print('Collectiong Garbage')
+        gc.collect()
         #rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
 
         
