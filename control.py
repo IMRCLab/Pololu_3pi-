@@ -21,7 +21,7 @@ class Control():
         self._states_mocap = Uart_handler
         self._states = states
         self._actions = actions
-        self.threshold = 0.02
+        self.threshold = 0.10
         self.K_x, self.K_y, self.K_theta = gains 
         self.controller = asyncio.create_task(self.control())
 
@@ -46,7 +46,10 @@ class Control():
                 x = x/1000
                 y = y/1000
                 theta = state[3].yaw
-                theta = theta + math.pi/2
+                if theta < 0:
+                    theta += math.pi
+                else:
+                    theta -= math.pi
                 print("x "+str(x))
                 print("y "+str(y))
                 print("theta "+str(theta))
@@ -83,6 +86,9 @@ class Control():
                 #for logging
                 self._robot.state_estimator.last_v_ctrl = v_ctrl
                 self._robot.state_estimator.last_omega_ctrl = omega_ctrl
+
+                self._robot.state_estimator.past_states.append([x, y, theta, t])
+                self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])
                 
                 #transform unicycle-model variables v_ctrl and omega_ctrl to differential-drive
                 #model control variables (angular speed of wheels) 
@@ -103,16 +109,16 @@ async def main():
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
-    gains = tuple((1.0,3.0,3.0))
+    gains = tuple((2.0,6.0,6.0))
     start_event = Event()
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
     while True:
         await asyncio.sleep(10)
+        rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
         print('Collectiong Garbage')
         gc.collect()
-        #rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
 
         
 asyncio.run(main())
