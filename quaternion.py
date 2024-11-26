@@ -4,8 +4,8 @@ import struct
 class Quaternion():
     def __init__(self,comp:int) -> None:
         self._x, self._y, self._z, self._w = self.quatdecompress(comp)
-        self._roll = math.atan2(2*(self._w*self._x+self._y*self._z),1-2*(self._x**2+self._y**2))
-        self._pitch = -math.pi/2 +math.atan2(math.sqrt(1+2*(self._w*self._y-self._x*self._z)),math.sqrt(1-2*(self._w*self._y-self._x*self._z)))
+        self._roll = None
+        self._pitch = None
         self._yaw = math.atan2(2*(self._w*self._z+self._x*self._y),1-2*(self._y**2+self._z**2))
     
     @property
@@ -26,10 +26,14 @@ class Quaternion():
     
     @property
     def roll(self):
+        if self.roll == None:
+            self._roll = math.atan2(2*(self._w*self._x+self._y*self._z),1-2*(self._x**2+self._y**2))
         return self._roll
 
     @property
     def pitch(self):
+        if self.pitch == None:
+            self._pitch = -math.pi/2 +math.atan2(math.sqrt(1+2*(self._w*self._y-self._x*self._z)),math.sqrt(1-2*(self._w*self._y-self._x*self._z)))
         return self._pitch
 
     @property
