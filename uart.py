@@ -54,5 +54,5 @@ class Uart():
                 print("MemoryError : Decode")        
                 self.decode = asyncio.create_task(self.decode_uart())
 
-    def get_position(self) : # TODO: Add return type 
+    def get_position(self) ->tuple: # TODO: Add return type 
         return self.message_decode

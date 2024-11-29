@@ -120,6 +120,9 @@ class State_Estimator():
             self.robot.display.text(f"log {run_name}",0,56)
             self.robot.display.show()
             print(logfile)
+            
+        self.past_states = list()
+        self.past_ctrl_actions = list()
     
             
     def start(self, turn_on):
