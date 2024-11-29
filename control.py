@@ -81,6 +81,7 @@ class Control():
                 #compute unicycle-model control variables (forwards speed and rotational speed)
                 v_ctrl = v_d*cos(theta_e) + self.K_x * x_e
                 omega_ctrl = omega_d + v_d*(self.K_y*y_e + self.K_theta*sin(theta_e)) + self.K_theta*theta_e
+                print(f"Control Actions: omega:{omega_ctrl}, v:{v_ctrl}")
                 await asyncio.sleep(0)
                 #for logging
                 self._robot.state_estimator.last_v_ctrl = v_ctrl
@@ -93,6 +94,7 @@ class Control():
                 u_L, u_R = self._robot.trsfm_ctrl_outputs(v_ctrl, omega_ctrl)
                 #transform [rad/s] speed to a value the motors can understand (0-6000)
                 u_L, u_R = self._robot.angular_speed_to_motor_speed(u_L), self._robot.angular_speed_to_motor_speed(u_R)
+                print(f"Motor Speed u_L:{u_L}, u_R:{u_R}")
                 self._robot.motors.set_speeds(u_L, u_R)
                 print(f'Free Memory {gc.mem_free()}')
                 await asyncio.sleep(0.00)
