@@ -30,6 +30,15 @@ class State_Estimator():
 
         ###for testing
         self.estimation_counter = 0
+        self.logfile = self.create_filename()
+
+    def create_filename(self) -> str:
+        localtime = time.localtime()
+        h,m,s = localtime[3],localtime[4],localtime[5]
+        run_name = f"{'trajectory'}_{h}_{m}_{s}"
+        #logfile = "/recordings/" + run_name
+        return "/logs/" + run_name
+        
 
 
     #according to the Timer API, the callback function MUST take an argument for the timer
@@ -95,31 +104,16 @@ class State_Estimator():
 
     #writes the recorded states and control actions, as well as the used trajectory & gains in a file of the log folder
     #the file's name reflects the trajectory and the time where it was executed
-    def write_states_to_json(self,traj:str ="",gains:tuple =()):
-        run = "run"
-        if traj == "/trajectories/line.json":
-            run = "lin"
-        elif traj == "/trajectories/rotation.json":
-            run = "rot"
-        elif traj == "/trajectories/curve.json":
-            run = "crv"
-                
-        print("run name ", run)        
-                
-        localtime = time.localtime()
-        h,m,s = localtime[3],localtime[4],localtime[5]
-        run_name = f"{run}_{h}_{m}_{s}"
-        #logfile = "/recordings/" + run_name
-        logfile = "/logs/" + run_name
-        
+    def write_states_to_json(self,traj:str = "",gains:tuple = ()):
+         
         #json file            
-        with open(logfile + ".json", "w+") as f:
+        with open(self.logfile + ".json", "a+") as f:
             dictionary = {'trajectory':traj, 'gains': gains, 'states' : self.past_states, 'actions':self.past_ctrl_actions}
             json_object = json.dumps(dictionary)
             f.write(json_object)
-            self.robot.display.text(f"log {run_name}",0,56)
+            self.robot.display.text(f"log {'trajectory'}",0,56)
             self.robot.display.show()
-            print(logfile)
+            print(self.logfile)
             
         self.past_states = list()
         self.past_ctrl_actions = list()
