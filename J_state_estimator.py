@@ -38,7 +38,7 @@ class State_Estimator():
         h,m,s = localtime[3],localtime[4],localtime[5]
         run_name = f"{file_type}_{h}_{m}_{s}"
         #logfile = "/recordings/" + run_name
-        return "/logs/" + run_name
+        return "/logs/" + run_name + '.csv'
     
     def create_csv(self) -> None:
         header_actions = ['v_ctrl','omega_ctrl']
@@ -119,11 +119,11 @@ class State_Estimator():
     #the file's name reflects the trajectory and the time where it was executed
     def write_states_to_json(self,traj:str = "",gains:tuple = ()):
          
-        with open(self.logfile_actions, 'w') as file:
+        with open(self.logfile_actions, 'a') as file:
             for row in self.past_ctrl_actions:
                 file.write(','.join(map(str, row)) + '\n')
 
-        with open(self.logfile_states, 'w') as file:
+        with open(self.logfile_states, 'a') as file:
             for row in self.past_states:
                 file.write(','.join(map(str, row)) + '\n')
 
