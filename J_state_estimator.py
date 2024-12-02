@@ -2,8 +2,6 @@ import time   #is this precise enough or should I use some time module of the 3p
 from math import sin, cos, pi
 from J_maths_module import *
 from machine import Timer
-import json
-
 
 class State_Estimator():
     def __init__(self, robot): 
@@ -30,14 +28,29 @@ class State_Estimator():
 
         ###for testing
         self.estimation_counter = 0
-        self.logfile = self.create_filename()
+        self.logfile_actions = self.create_filename('actions')
+        self.logfile_states = self.create_filename('states')
 
-    def create_filename(self) -> str:
+        self.create_csv()
+
+    def create_filename(self, file_type:str) -> str:
         localtime = time.localtime()
         h,m,s = localtime[3],localtime[4],localtime[5]
-        run_name = f"{'trajectory'}_{h}_{m}_{s}"
+        run_name = f"{file_type}_{h}_{m}_{s}"
         #logfile = "/recordings/" + run_name
         return "/logs/" + run_name
+    
+    def create_csv(self) -> None:
+        header_actions = ['v_ctrl','omega_ctrl']
+        with open(self.logfile_actions, 'w') as file:
+            # Write the headers
+            file.write(','.join(header_actions) + '\n')
+        header_states = ['x','y','theta','t']
+        with open(self.logfile_states, 'w') as file:
+            # Write the headers
+            file.write(','.join(header_states) + '\n')
+
+
         
 
 
@@ -106,14 +119,14 @@ class State_Estimator():
     #the file's name reflects the trajectory and the time where it was executed
     def write_states_to_json(self,traj:str = "",gains:tuple = ()):
          
-        #json file            
-        with open(self.logfile + ".json", "a+") as f:
-            dictionary = {'trajectory':traj, 'gains': gains, 'states' : self.past_states, 'actions':self.past_ctrl_actions}
-            json_object = json.dumps(dictionary)
-            f.write(json_object)
-            self.robot.display.text(f"log {'trajectory'}",0,56)
-            self.robot.display.show()
-            print(self.logfile)
+        with open(self.logfile_actions, 'w') as file:
+            for row in self.past_ctrl_actions:
+                file.write(','.join(map(str, row)) + '\n')
+
+        with open(self.logfile_states, 'w') as file:
+            for row in self.past_states:
+                file.write(','.join(map(str, row)) + '\n')
+
             
         self.past_states = list()
         self.past_ctrl_actions = list()
