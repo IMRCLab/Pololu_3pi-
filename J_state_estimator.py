@@ -118,7 +118,7 @@ class State_Estimator():
     #writes the recorded states and control actions, as well as the used trajectory & gains in a file of the log folder
     #the file's name reflects the trajectory and the time where it was executed
     def write_states_to_json(self,traj:str = "",gains:tuple = ()):
-         
+
         with open(self.logfile_actions, 'a') as file:
             for row in self.past_ctrl_actions:
                 file.write(','.join(map(str, row)) + '\n')

@@ -1,77 +1,15 @@
 import json
-  
+import csv
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
 import numpy as np
 import os
-
-
-
-
-
-def plot_trajectories():
-
-    with open("line.json") as f:
-        data = json.load(f)
-    states = data["result"][0]['states']
-    ctrl_actions = data["result"][0]["actions"]  
-
-    x_pos = np.array([state[0] for state in states])
-    y_pos = np.array([state[1] for state in states])
-
-
-    with plt.xkcd():
-        # Based on "Stove Ownership" from XKCD by Randall Munroe
-        # https://xkcd.com/418/
-
-        # fig,ax = plt.subplots()
-        fig = plt.figure()
-        ax = fig.add_axes((0.1, 0.2, 0.8, 0.7))  #i don't know what this line actually does
-        ax.spines[['top', 'right']].set_visible(True)   #True for a full rectangle around the graph, false for only x-y axis
-        # ax.set_xticks(np.arange)
-        # ax.set_yticks([])
-        # ax.set_ylim([-30, 10])
-        ax.plot(x_pos,y_pos)
-
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        fig.text(
-            0.5, 0.05,
-            '"Pololu trajectory" in xkcd graph',
-            ha='center')
-
-        plt.show()
-
-    with plt.xkcd():
-        ###real###
-
-        with open("lin_17_44_25.json") as f:
-            realdata = json.load(f)
-            realstates = realdata["states"]
-        
-        realx = np.array([state[0] for state in states])
-        realy = np.array([state[1] for state in states])
-        fig = plt.figure()
-        ax = fig.add_axes((0.1, 0.2, 0.8, 0.7))  #i don't know what this line actually does
-        ax.spines[['top', 'right']].set_visible(True)   #True for a full rectangle around the graph, false for only x-y axis
-        ax.plot(realx,realy)
-
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        fig.text(
-            0.5, 0.05,
-            '"real trajectory" in xkcd graph',
-            ha='center')
-
-        plt.show()
-
-
     
 def plot_individual(jsonfile, traj):
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
-    trajectory_file = "/media/polyblank/MicroPython/trajectories/" + traj
+    #os.chdir("../logs")
+    trajectory_file = "../trajectories/" + traj # TODO
     with open(trajectory_file) as f:
         data = json.load(f)
     states = data["result"][0]['states']
@@ -92,12 +30,27 @@ def plot_individual(jsonfile, traj):
     omega_desired = np.array([action[1] for action in ctrl_actions])
 
     print(len(time), len(x_pos_desired))
-   
-    with open(jsonfile) as f:
-        realdata = json.load(f)
-        realstates = realdata["states"]
-        real_ctrl_actions = realdata["actions"]
-        #real_ctrl_actions.append([0,0])
+    if '.json' in jsonfile:
+        with open(jsonfile) as f:
+            realdata = json.load(f)
+            realstates = realdata["states"]
+            real_ctrl_actions = realdata["actions"]
+            #real_ctrl_actions.append([0,0])
+    elif '.csv' in jsonfile:
+        states = [[],[],[],[]]
+        actions = [[],[]]
+        with open(jsonfile, "r") as file:
+            reader = csv.reader(file)
+            header = next(reader)  # Skip the header row (if present)
+            for row in reader:
+                # Append values from specific columns to lists
+                states[0].append(row[0])  # First column
+                states[1].append(row[1])  # Second column
+                states[2].append(row[2])
+                states[3].append(row[3])
+
+        
+                
     realx = np.array([state[0] for state in realstates])
     realy = np.array([state[1] for state in realstates])
     realtheta = np.array([state[2] for state in realstates])
@@ -259,8 +212,8 @@ def plot_individual(jsonfile, traj):
 
 
 def plot_all(path):
-    # os.chdir("/")
-    os.chdir(path)
+    os.chdir("logs")
+    #os.chdir(path) # TODO
     runs = os.listdir()
     if runs == []:
         print("logs directory is empty. If it should contain logs but they're not showing up, try to restart the 3pi+")
@@ -274,6 +227,8 @@ def plot_all(path):
             traj = "rotation.json"
         elif run_namestart == "crv":
             traj = "curve.json"
+        elif run_namestart == 'tra':
+            traj = 'line.json' # TODO
         else:
             print(f"{run} was not plotted since no reference trajectory was provided")
             continue
