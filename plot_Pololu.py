@@ -43,11 +43,14 @@ def plot_individual(logs_file:str, traj:str):
             #real_ctrl_actions.append([0,0])
 
     elif '.csv' in logs_file: #TODO Dates can sometimes be shorter if they are only one char long , have to check that
-        states_file = str(traj[:3]+ '_' + "states" + logs_file[-13:-4] + ".csv")
+        print(logs_file)
+        states_file = str(traj[:3]+ '_' + "_states" + logs_file[11:])
         try:
             with open(states_file, "r") as file:
                 reader = csv.reader(file)
                 header = next(reader)  # Skip the header row (if present)
+                header_gains = next(reader)
+                gains = next(reader)
                 for row in reader:
                     # Append values from specific columns to lists
                     realstates.append([float(row[0]),float(row[1]),float(row[2]),float(row[3])])
@@ -58,7 +61,6 @@ def plot_individual(logs_file:str, traj:str):
             header = next(reader)  # Skip the header row (if present)
             for row in reader:
                 real_ctrl_actions.append([float(row[0]),float(row[1])])
-        gains = [1,4,4]
 
                
     realx = np.array([state[0] for state in realstates])

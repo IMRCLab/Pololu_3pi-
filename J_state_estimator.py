@@ -29,7 +29,7 @@ class State_Estimator():
         ###for testing
         self.estimation_counter = 0
         self.logfile_actions = self.create_filename('actions')
-        self.logfile_states = self.create_filename('states')
+        self.logfile_states = self.create_filename('_states')
 
     def update_logfile_traj(self, traj:str) -> None:
         self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
