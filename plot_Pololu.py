@@ -44,7 +44,7 @@ def plot_individual(logs_file:str, traj:str):
 
     elif '.csv' in logs_file: #TODO Dates can sometimes be shorter if they are only one char long , have to check that
         print(logs_file)
-        states_file = str(traj[:3]+ '_' + "_states" + logs_file[11:])
+        states_file = str(traj[:3]+ '_' + "states" + logs_file[11:])
         try:
             with open(states_file, "r") as file:
                 reader = csv.reader(file)
@@ -94,13 +94,13 @@ def plot_individual(logs_file:str, traj:str):
     # jsonfile_name = jsonfile[jsonfile.find("run"):]
     # run_name = f"file name : {jsonfile_name}"
     run_name = f"file name : {logs_file}"
-
+    os.chdir('../plots')
     title_text = text + "\n" + trajectory + "\n" + run_name + "\n" + title_text_gains + "\n"
     fig = plt.figure(figsize=(5,8))
     fig.text(0.1, 0.1, title_text, size=11)
     traj_name = trajectory.replace("trajectory: ", "")
     traj_name = traj_name.replace(".json", "")
-    pdf_name = f"{traj_name}_{gains[0]}_{gains[1]}_{gains[2]}.pdf"
+    pdf_name = f"{traj_name}_{logs_file[11:-4]}.pdf"
     pdf_name = file_guard(pdf_name)
     pdf_pages = PdfPages(pdf_name)
     pdf_pages.savefig(fig)
@@ -219,11 +219,12 @@ def plot_individual(logs_file:str, traj:str):
     pdf_pages.close()
     plt.close('all')
     print(f"created {pdf_name}")
+    os.chdir('../logs2')
 
 
 
 def plot_all(path):
-    os.chdir("logs")
+    os.chdir("logs2")
     #os.chdir(path) # TODO
     runs = os.listdir()
     if runs == []:
