@@ -31,16 +31,16 @@ class State_Estimator():
         self.logfile_actions = self.create_filename('actions')
         self.logfile_states = self.create_filename('states')
 
-        self.create_csv()
-
     def update_logfile_traj(self, traj:str) -> None:
-        self.logfile_actions = str(traj + '_' + self.logfile_actions)
-        self.logfile_states = str(traj + '_' + self.logfile_states)
+        self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
+        self.logfile_states = str(self.logfile_states[:6] + traj + '_' + self.logfile_states[6:])
     
     def save_gains(self,gains:tuple) -> None:
         with open(self.logfile_states, 'a') as file:
             # Write the headers
-            file.write(','.join(gains) + '\n')
+            line = ','.join(map(str, gains))  # Convert tuple to CSV line
+            file.write('gains' + '\n')
+            file.write(line + '\n')  # Write the line with a newline
 
     def create_filename(self, file_type:str) -> str:
         localtime = time.localtime()
@@ -51,11 +51,13 @@ class State_Estimator():
     
     def create_csv(self) -> None:
         header_actions = ['v_ctrl','omega_ctrl']
-        with open(self.logfile_actions, 'w') as file:
+        print(self.logfile_actions)
+        with open(self.logfile_actions, 'w+') as file:
             # Write the headers
             file.write(','.join(header_actions) + '\n')
         header_states = ['x','y','theta','t']
-        with open(self.logfile_states, 'w') as file:
+        print(self.logfile_states)
+        with open(self.logfile_states, 'w+') as file:
             # Write the headers
             file.write(','.join(header_states) + '\n')
 
@@ -127,7 +129,7 @@ class State_Estimator():
     #writes the recorded states and control actions, as well as the used trajectory & gains in a file of the log folder
     #the file's name reflects the trajectory and the time where it was executed
     def write_states_to_csv(self,traj:str = "",gains:tuple = ()):
-
+        
         with open(self.logfile_actions, 'a') as file:
             for row in self.past_ctrl_actions:
                 file.write(','.join(map(str, row)) + '\n')

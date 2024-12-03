@@ -118,6 +118,7 @@ async def main():
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
     rob.state_estimator.update_logfile_traj('lin') # TODO fix for real use
+    rob.state_estimator.create_csv()
     rob.state_estimator.save_gains(gains)
     while True:
         await asyncio.sleep(10)
