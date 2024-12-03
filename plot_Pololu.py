@@ -7,6 +7,8 @@ import numpy as np
 import os
     
 def plot_individual(logs_file:str, traj:str):
+    if traj == '':
+        return
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
     #os.chdir("../logs")
     trajectory_file = "../trajectories/" + traj # TODO
@@ -30,29 +32,33 @@ def plot_individual(logs_file:str, traj:str):
     omega_desired = np.array([action[1] for action in ctrl_actions])
     realstates = []
     real_ctrl_actions = []
+    gains = [] # TODO save gains somehow for csv files
     print(len(time), len(x_pos_desired))
     if '.json' in logs_file:
         with open(logs_file) as f:
             realdata = json.load(f)
             realstates = realdata["states"]
             real_ctrl_actions = realdata["actions"]
+            gains = realdata['gains']
             #real_ctrl_actions.append([0,0])
+
     elif '.csv' in logs_file: #TODO Dates can sometimes be shorter if they are only one char long , have to check that
-        states_file = str("states" + logs_file[-13:-4] + ".csv")
+        states_file = str(traj[:3]+ '_' + "states" + logs_file[-13:-4] + ".csv")
         try:
             with open(states_file, "r") as file:
                 reader = csv.reader(file)
                 header = next(reader)  # Skip the header row (if present)
                 for row in reader:
                     # Append values from specific columns to lists
-                    realstates.append([row[0],row[1],row[2],row[3]])
+                    realstates.append([float(row[0]),float(row[1]),float(row[2]),float(row[3])])
         except:
             print('no states file found')
         with open(logs_file, "r") as file:
             reader = csv.reader(file)
             header = next(reader)  # Skip the header row (if present)
             for row in reader:
-                real_ctrl_actions.append([row[0],row[1]])
+                real_ctrl_actions.append([float(row[0]),float(row[1])])
+        gains = [1,4,4]
 
                
     realx = np.array([state[0] for state in realstates])
@@ -82,7 +88,6 @@ def plot_individual(logs_file:str, traj:str):
     #create title page
     text = 'Pololu 3pi+ trajectory test (straight line)'
     trajectory = "trajectory: " + trajectory_file.replace("/media/julien/MicroPython/trajectories/", "")
-    gains = realdata["gains"]
     title_text_gains = f"K_x = {gains[0]}   K_y = {gains[1]}    K_theta = {gains[2]}"
     # jsonfile_name = jsonfile[jsonfile.find("run"):]
     # run_name = f"file name : {jsonfile_name}"
@@ -225,7 +230,9 @@ def plot_all(path):
         print(f"plotting {run}")
         run_namestart = run[:3]
         traj = None
-        if run_namestart == "lin":
+        if 'states' in run:
+            traj = ''
+        elif run_namestart == "lin":
             traj = "line.json"
         elif run_namestart == "rot":
             traj = "rotation.json"
