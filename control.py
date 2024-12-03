@@ -117,11 +117,12 @@ async def main():
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
+    rob.state_estimator.update_logfile_traj('lin') # TODO fix for real use
     while True:
         await asyncio.sleep(10)
         print(rob.state_estimator.past_states)
         print(rob.state_estimator.past_ctrl_actions)
-        rob.state_estimator.write_states_to_json(gains=gains, traj="/trajectories/line.json")
+        rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/line.json")
         print('Collectiong Garbage')
         gc.collect()
         

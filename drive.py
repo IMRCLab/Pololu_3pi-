@@ -65,5 +65,5 @@ while controlling :
 rob.motors.off()
 rob.state_estimator.display_state()
 rob.state_estimator.start(False)
-rob.state_estimator.write_states_to_json(gains=gains, traj=traj)
+rob.state_estimator.write_states_to_csv(gains=gains, traj=traj)
 print("finished")

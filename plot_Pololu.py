@@ -6,7 +6,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import os
     
-def plot_individual(jsonfile, traj):
+def plot_individual(logs_file:str, traj:str):
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
     #os.chdir("../logs")
     trajectory_file = "../trajectories/" + traj # TODO
@@ -28,29 +28,33 @@ def plot_individual(jsonfile, traj):
     #time = np.array([state[3] for state in states])
     v_desired = np.array([action[0] for action in ctrl_actions])
     omega_desired = np.array([action[1] for action in ctrl_actions])
-
+    realstates = []
+    real_ctrl_actions = []
     print(len(time), len(x_pos_desired))
-    if '.json' in jsonfile:
-        with open(jsonfile) as f:
+    if '.json' in logs_file:
+        with open(logs_file) as f:
             realdata = json.load(f)
             realstates = realdata["states"]
             real_ctrl_actions = realdata["actions"]
             #real_ctrl_actions.append([0,0])
-    elif '.csv' in jsonfile:
-        states = [[],[],[],[]]
-        actions = [[],[]]
-        with open(jsonfile, "r") as file:
+    elif '.csv' in logs_file: #TODO Dates can sometimes be shorter if they are only one char long , have to check that
+        states_file = str("states" + logs_file[-13:-4] + ".csv")
+        try:
+            with open(states_file, "r") as file:
+                reader = csv.reader(file)
+                header = next(reader)  # Skip the header row (if present)
+                for row in reader:
+                    # Append values from specific columns to lists
+                    realstates.append([row[0],row[1],row[2],row[3]])
+        except:
+            print('no states file found')
+        with open(logs_file, "r") as file:
             reader = csv.reader(file)
             header = next(reader)  # Skip the header row (if present)
             for row in reader:
-                # Append values from specific columns to lists
-                states[0].append(row[0])  # First column
-                states[1].append(row[1])  # Second column
-                states[2].append(row[2])
-                states[3].append(row[3])
+                real_ctrl_actions.append([row[0],row[1]])
 
-        
-                
+               
     realx = np.array([state[0] for state in realstates])
     realy = np.array([state[1] for state in realstates])
     realtheta = np.array([state[2] for state in realstates])
@@ -82,7 +86,7 @@ def plot_individual(jsonfile, traj):
     title_text_gains = f"K_x = {gains[0]}   K_y = {gains[1]}    K_theta = {gains[2]}"
     # jsonfile_name = jsonfile[jsonfile.find("run"):]
     # run_name = f"file name : {jsonfile_name}"
-    run_name = f"file name : {jsonfile}"
+    run_name = f"file name : {logs_file}"
 
     title_text = text + "\n" + trajectory + "\n" + run_name + "\n" + title_text_gains + "\n"
     fig = plt.figure(figsize=(5,8))
