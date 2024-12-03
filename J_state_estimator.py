@@ -33,9 +33,14 @@ class State_Estimator():
 
         self.create_csv()
 
-    def update_logfile_traj(self,traj:str) ->None:
+    def update_logfile_traj(self, traj:str) -> None:
         self.logfile_actions = str(traj + '_' + self.logfile_actions)
         self.logfile_states = str(traj + '_' + self.logfile_states)
+    
+    def save_gains(self,gains:tuple) -> None:
+        with open(self.logfile_states, 'a') as file:
+            # Write the headers
+            file.write(','.join(gains) + '\n')
 
     def create_filename(self, file_type:str) -> str:
         localtime = time.localtime()
