@@ -107,8 +107,9 @@ class Control():
 from uart import Uart
 async def main():
     rob = Robot()
-    trajectory = 'line.json' # TODO change to pick mechanism later
-    with open("/trajectories/" + trajectory) as f:
+    with open("/config/config.json","r") as f:
+        trajectory = json.load(f)
+    with open("/trajectories/" + trajectory["trajectory"],"r") as f:
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
@@ -117,7 +118,7 @@ async def main():
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
-    rob.state_estimator.update_logfile_traj(trajectory[:3])
+    rob.state_estimator.update_logfile_traj(trajectory["trajectory"][:3])
     rob.state_estimator.create_csv()
     rob.state_estimator.save_gains(gains)
     while True:
