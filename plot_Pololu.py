@@ -11,7 +11,7 @@ def plot_individual(logs_file:str, traj:str):
         return
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
     #os.chdir("../logs")
-    trajectory_file = "../trajectories/" + traj # TODO
+    trajectory_file = "../trajectories/" + traj 
     with open(trajectory_file) as f:
         data = json.load(f)
     states = data["result"][0]['states']
@@ -32,7 +32,7 @@ def plot_individual(logs_file:str, traj:str):
     omega_desired = np.array([action[1] for action in ctrl_actions])
     realstates = []
     real_ctrl_actions = []
-    gains = [] # TODO save gains somehow for csv files
+    gains = [] 
     print(len(time), len(x_pos_desired))
     if '.json' in logs_file:
         with open(logs_file) as f:
@@ -42,7 +42,7 @@ def plot_individual(logs_file:str, traj:str):
             gains = realdata['gains']
             #real_ctrl_actions.append([0,0])
 
-    elif '.csv' in logs_file: #TODO Dates can sometimes be shorter if they are only one char long , have to check that
+    elif '.csv' in logs_file:
         print(logs_file)
         states_file = str(traj[:3]+ '_' + "states" + logs_file[11:])
         try:
@@ -225,7 +225,7 @@ def plot_individual(logs_file:str, traj:str):
 
 def plot_all(path):
     os.chdir("logs2")
-    #os.chdir(path) # TODO
+    #os.chdir(path) # TODO how to get the users path to usb
     runs = os.listdir()
     if runs == []:
         print("logs directory is empty. If it should contain logs but they're not showing up, try to restart the 3pi+")
@@ -241,8 +241,6 @@ def plot_all(path):
             traj = "rotation.json"
         elif run_namestart == "crv":
             traj = "curve.json"
-        elif run_namestart == 'tra':
-            traj = 'line.json' # TODO
         else:
             print(f"{run} was not plotted since no reference trajectory was provided")
             continue
