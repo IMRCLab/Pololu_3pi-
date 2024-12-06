@@ -36,6 +36,7 @@ class State_Estimator():
     def update_logfile_traj(self, traj:str) -> None:
         self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
         self.logfile_states = str(self.logfile_states[:6] + traj + '_' + self.logfile_states[6:])
+        self.logfile_desired = str(self.logfile_desired[:6] + traj + '_' + self.logfile_desired[6:])
     
     def save_gains(self,gains:tuple) -> None:
         with open(self.logfile_states, 'a') as file:
@@ -63,6 +64,7 @@ class State_Estimator():
             # Write the headers
             file.write(','.join(header_states) + '\n')
         header_desired = ["x_d",'y_d','theta_d', "v_ctrl_d",'omega_ctrl_d','t']
+        print(self.logfile_desired)
         with open(self.logfile_desired, 'w+') as file:
             # Write the headers
             file.write(','.join(header_desired) + '\n')

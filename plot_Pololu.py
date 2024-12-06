@@ -11,25 +11,18 @@ def plot_individual(logs_file:str, traj:str):
         return
     # trajectory_file = "/media/julien/MicroPython/trajectories/curve.json"
     #os.chdir("../logs")
-    trajectory_file = "../trajectories/" + traj 
-    with open(trajectory_file) as f:
-        data = json.load(f)
-    states = data["result"][0]['states']
-    ctrl_actions = data["result"][0]["actions"]  
-    print(len(ctrl_actions))
+    
     #no action is given for the last timestep since robot is assumed to have finished trajectory and stopped
     #for the dimensions to match we will thus append the "rest action" v_ctrl = 0, omega_ctrl=0 to the arrays
-    ctrl_actions.append([0,0])
-    print(len(ctrl_actions))
+    
 
-    x_pos_desired = np.array([state[0] for state in states])
-    y_pos_desired = np.array([state[1] for state in states])
-    theta_desired = np.array([state[2] for state in states])
-    #the planner has a timestep of 0.1s, so we need a time array like such [0, 0.1, 0.2, ..... len(states)*0.1]
+    
     #time = np.arange(0, len(states)) * 0.1 #create an array of the same size as desired states with 0.1 interva between each value
     #time = np.array([state[3] for state in states])
-    v_desired = np.array([action[0] for action in ctrl_actions])
-    omega_desired = np.array([action[1] for action in ctrl_actions])
+    ctrl_actions = []
+    states = []
+    time = np.array([])
+
     realstates = []
     desired_values = []
     real_ctrl_actions = []
@@ -42,7 +35,15 @@ def plot_individual(logs_file:str, traj:str):
             real_ctrl_actions = realdata["actions"]
             gains = realdata['gains']
             #real_ctrl_actions.append([0,0])
+        trajectory_file = "../trajectories/" + traj 
 
+        with open(trajectory_file) as f:
+            data = json.load(f)
+        states = data["result"][0]['states']
+        ctrl_actions = data["result"][0]["actions"]  
+        ctrl_actions.append([0,0])
+        time = np.arange(0, len(states)) * 0.1
+        
     elif '.csv' in logs_file:
         print(logs_file)
         states_file = str(traj[:3]+ '_' + "states" + logs_file[11:])
@@ -64,17 +65,29 @@ def plot_individual(logs_file:str, traj:str):
                 header = next(reader)  # Skip the header row (if present)
                 for row in reader:
                     # Append values from specific columns to lists
-                    desired_values.append([float(row[0]),float(row[1]),float(row[2])])
+                    desired_values.append([float(row[0]),float(row[1]),float(row[2]),float(row[3]),float(row[4]),float(row[5])])
         except:
             print('no desired values file found')
-
+        states = [row[:3] for row in desired_values]
+        ctrl_actions = [row[3:-1] for row in desired_values]
+        time = np.array([desired_values[5]])
         with open(logs_file, "r") as file:
             reader = csv.reader(file)
             header = next(reader)  # Skip the header row (if present)
             for row in reader:
                 real_ctrl_actions.append([float(row[0]),float(row[1])])
 
-    time = desired_values[5]
+            
+
+   
+
+    x_pos_desired = np.array([state[0] for state in states])
+    y_pos_desired = np.array([state[1] for state in states])
+    theta_desired = np.array([state[2] for state in states])
+    #the planner has a timestep of 0.1s, so we need a time array like such [0, 0.1, 0.2, ..... len(states)*0.1]
+    v_desired = np.array([action[0] for action in ctrl_actions])
+    omega_desired = np.array([action[1] for action in ctrl_actions])
+
     realx = np.array([state[0] for state in realstates])
     realy = np.array([state[1] for state in realstates])
     realtheta = np.array([state[2] for state in realstates])
@@ -245,7 +258,7 @@ def plot_all(path):
         print(f"plotting {run}")
         run_namestart = run[:3]
         traj = None
-        if 'states' in run:
+        if 'states' in run or 'desired' in run:
             traj = ''
         elif run_namestart == "lin":
             traj = "line.json"
