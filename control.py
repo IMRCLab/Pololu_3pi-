@@ -69,7 +69,7 @@ class Control():
                 if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold:
                     index +=1
                     print(index)
-                    self._robot.state_estimator.desired_values.append([self._states[index+1],self._actions[index], t ])
+                    self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
                 v_d, omega_d = self._actions[index]
 
                 

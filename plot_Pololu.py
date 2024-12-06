@@ -26,14 +26,15 @@ def plot_individual(logs_file:str, traj:str):
     y_pos_desired = np.array([state[1] for state in states])
     theta_desired = np.array([state[2] for state in states])
     #the planner has a timestep of 0.1s, so we need a time array like such [0, 0.1, 0.2, ..... len(states)*0.1]
-    time = np.arange(0, len(states)) * 0.1 #create an array of the same size as desired states with 0.1 interva between each value
+    #time = np.arange(0, len(states)) * 0.1 #create an array of the same size as desired states with 0.1 interva between each value
     #time = np.array([state[3] for state in states])
     v_desired = np.array([action[0] for action in ctrl_actions])
     omega_desired = np.array([action[1] for action in ctrl_actions])
     realstates = []
+    desired_values = []
     real_ctrl_actions = []
     gains = [] 
-    print(len(time), len(x_pos_desired))
+    #print(len(time), len(x_pos_desired))
     if '.json' in logs_file:
         with open(logs_file) as f:
             realdata = json.load(f)
@@ -56,13 +57,24 @@ def plot_individual(logs_file:str, traj:str):
                     realstates.append([float(row[0]),float(row[1]),float(row[2]),float(row[3])])
         except:
             print('no states file found')
+        desired_file = str(traj[:3]+ '_' + "desired" + logs_file[11:])
+        try:
+            with open(desired_file, "r") as file:
+                reader = csv.reader(file)
+                header = next(reader)  # Skip the header row (if present)
+                for row in reader:
+                    # Append values from specific columns to lists
+                    desired_values.append([float(row[0]),float(row[1]),float(row[2])])
+        except:
+            print('no desired values file found')
+
         with open(logs_file, "r") as file:
             reader = csv.reader(file)
             header = next(reader)  # Skip the header row (if present)
             for row in reader:
                 real_ctrl_actions.append([float(row[0]),float(row[1])])
 
-               
+    time = desired_values[5]
     realx = np.array([state[0] for state in realstates])
     realy = np.array([state[1] for state in realstates])
     realtheta = np.array([state[2] for state in realstates])

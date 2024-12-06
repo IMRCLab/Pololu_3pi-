@@ -62,7 +62,7 @@ class State_Estimator():
         with open(self.logfile_states, 'w+') as file:
             # Write the headers
             file.write(','.join(header_states) + '\n')
-        header_desired = ["desired_states", "desired_actions",'t']
+        header_desired = ["x_d",'y_d','theta_d', "v_ctrl_d",'omega_ctrl_d','t']
         with open(self.logfile_desired, 'w+') as file:
             # Write the headers
             file.write(','.join(header_desired) + '\n')
