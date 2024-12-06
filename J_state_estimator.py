@@ -25,11 +25,13 @@ class State_Estimator():
         self.past_ctrl_actions= []
         self.last_v_ctrl = 0
         self.last_omega_ctrl = 0
+        self.desired_values = []
 
         ###for testing
         self.estimation_counter = 0
         self.logfile_actions = self.create_filename('actions')
         self.logfile_states = self.create_filename('states')
+        self.logfile_desired = self.create_filename("desired")
 
     def update_logfile_traj(self, traj:str) -> None:
         self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
@@ -60,6 +62,12 @@ class State_Estimator():
         with open(self.logfile_states, 'w+') as file:
             # Write the headers
             file.write(','.join(header_states) + '\n')
+        header_desired = ["desired_states", "desired_actions",'t']
+        with open(self.logfile_desired, 'w+') as file:
+            # Write the headers
+            file.write(','.join(header_desired) + '\n')
+
+
 
 
         
@@ -138,7 +146,11 @@ class State_Estimator():
             for row in self.past_states:
                 file.write(','.join(map(str, row)) + '\n')
 
-            
+        with open(self.logfile_desired, "a") as file :
+            for row in self.desired_values:
+                file.write(','.join(map(str, row)) + '\n')
+        
+        self.desired_values = list()
         self.past_states = list()
         self.past_ctrl_actions = list()
     

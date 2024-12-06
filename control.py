@@ -41,7 +41,7 @@ class Control():
                 print(t)
                 state = self._states_mocap.get_position()
                 #print(state)
-                x,y,_,_ = state
+                x,y,_,_ = state # TODO Add transformation for positions so real is accounted for not postion of marker deck 
                 x = x/1000
                 y = y/1000
                 theta = state[3].yaw
@@ -69,6 +69,7 @@ class Control():
                 if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold:
                     index +=1
                     print(index)
+                    self._robot.state_estimator.desired_values.append([self._states[index+1],self._actions[index], t ])
                 v_d, omega_d = self._actions[index]
 
                 
@@ -108,8 +109,9 @@ from uart import Uart
 async def main():
     rob = Robot()
     with open("/config/config.json","r") as f:
-        trajectory = json.load(f)
-    with open("/trajectories/" + trajectory["trajectory"],"r") as f:
+        config = json.load(f)
+    trajectory = config["trajectory"]
+    with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
     states = data["result"][0]['states']
     ctrl_actions = data["result"][0]["actions"]
@@ -118,7 +120,7 @@ async def main():
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),Uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
-    rob.state_estimator.update_logfile_traj(trajectory["trajectory"][:3])
+    rob.state_estimator.update_logfile_traj(trajectory[:3])
     rob.state_estimator.create_csv()
     rob.state_estimator.save_gains(gains)
     while True:
