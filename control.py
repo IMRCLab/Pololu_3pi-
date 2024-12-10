@@ -21,7 +21,7 @@ class Control():
         self._states_mocap = Uart_handler
         self._states = states
         self._actions = actions
-        self.threshold = 0.10
+        self.threshold = 0.05
         self.K_x, self.K_y, self.K_theta = gains 
         self.controller = asyncio.create_task(self.control())
 
@@ -31,6 +31,8 @@ class Control():
         #await self.event.wait()
         run = True
         index = 0
+        finish_time = 10
+        self._start_time = time.time_ns()
         while run: #TODO What happens if trajectory is done -> just stops right now 
             try:
                 await asyncio.sleep(0)
@@ -39,6 +41,7 @@ class Control():
                 t = time.time_ns() - self._start_time
                 t *= (10**-9)
                 print(t)
+                index =  round(len(self._actions) * t / finish_time)
                 state = self._states_mocap.get_position()
                 #print(state)
                 x,y,_,_ = state # TODO Add transformation for positions so real is accounted for not postion of marker deck 
@@ -53,26 +56,26 @@ class Control():
                 print("y "+str(y))
                 print("theta "+str(theta))
                 print(t)
-                print(f"action i:{index} ; state i:{index+1}")
-                
+                print(f"action i:{index} ; state i:{index}")
+                # TODO take states and actions according to time 
                 #get desired state and velocities
-                if index >= len(self._actions):
+                if index >= len(self._actions)-1:
                     print("no more action left : goal should be reached")
                     self._robot.motors.off()
                     run = False
+                    #self._robot.state_estimator.write_states_to_csv(gains=(self.K_x,self.K_y,self.K_theta), traj="/trajectories/unicycle_flatness.json")
                     break
                 
                 await asyncio.sleep(0.0)
                 #get desired state and velocities
                 x_d, y_d, theta_d = self._states[index+1]
-                print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}')
-                if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold:
-                    index +=1
-                    print(index)
-                    self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
+                print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}') # todo FINISHING CONDITION
+
+                #if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold and abs(theta_d-theta) < self.threshold:
+                #index +=1
+                print(index)
                 v_d, omega_d = self._actions[index]
 
-                
                 #compute error
                 x_e = (x_d-x)*cos(theta) + (y_d - y)*sin(theta)
                 y_e = -(x_d - x)*sin(theta) + (y_d - y)*cos(theta)
@@ -101,9 +104,12 @@ class Control():
                 await asyncio.sleep(0.00)
             except:
                 print('invalid message received')
-            if t % 0.1 < 0.01:
-                self._robot.state_estimator.past_states.append([x, y, theta, t])
-                self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])   
+            if t % 0.2  < 0.2:
+                pass
+                #self._robot.state_estimator.past_states.append([x, y, theta, t])
+                #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
+                #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
+ 
 
 from uart import Uart
 async def main():
@@ -113,9 +119,9 @@ async def main():
     trajectory = config["trajectory"]
     with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
-    states = data["result"][0]['states']
-    ctrl_actions = data["result"][0]["actions"]
-    gains = tuple((2.0,6.0,6.0))
+    states = data["result"]['states']
+    ctrl_actions = data["result"]["actions"]
+    gains = tuple((6.5,9.5,16.50))
     start_event = Event()
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
@@ -127,9 +133,10 @@ async def main():
         await asyncio.sleep(5)
         print(rob.state_estimator.past_states)
         print(rob.state_estimator.past_ctrl_actions)
-        rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/line.json")
+        #rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/unicycle_flatness.json")
         print('Collectiong Garbage')
         gc.collect()
+        pass
         
 
         
