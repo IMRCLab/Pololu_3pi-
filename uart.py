@@ -42,10 +42,12 @@ class Uart():
                     z = struct.unpack('<h',buffer[7:9])[0]
                     quaternion = Quaternion(int.from_bytes(buffer[9:13], 'little'))
                     self.message_decode=(x,y,z,quaternion)
-                elif buffer[0] == 2 and buffer[1] == 0x05:
+                elif buffer[0] == 0x8f and buffer[1] == 0x05:
                     self.event.set()
+                    print('start Event received')
+                    continue
                 else :
-                    print("else")
+                    print("Unknown Message received")
                     pass
                 if not self.first_message.is_set():
                         self.first_message.set()

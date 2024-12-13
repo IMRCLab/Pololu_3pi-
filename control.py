@@ -26,9 +26,10 @@ class Control():
         self.controller = asyncio.create_task(self.control())
 
     async def control(self)-> None:
-        print('start control')
         await asyncio.sleep(1)
-        #await self.event.wait()
+        await self.event.wait()
+        await self.first_message.wait()
+        print('start control')
         run = True
         index = 0
         finish_time = 10
@@ -36,8 +37,6 @@ class Control():
         while run: #TODO What happens if trajectory is done -> just stops right now 
             try:
                 await asyncio.sleep(0)
-                await self.first_message.wait()
-                self.first_message.clear()
                 t = time.time_ns() - self._start_time
                 t *= (10**-9)
                 print(t)
@@ -48,7 +47,7 @@ class Control():
                 x = x/1000
                 y = y/1000
                 theta = state[3].yaw
-                if theta < 0:
+                if theta < 0: # might have to change when position of tracker deck moves
                     theta += math.pi
                 else:
                     theta -= math.pi
@@ -131,12 +130,12 @@ async def main():
     rob.state_estimator.save_gains(gains)
     while True:
         await asyncio.sleep(5)
-        print(rob.state_estimator.past_states)
-        print(rob.state_estimator.past_ctrl_actions)
+        #print(rob.state_estimator.past_states)
+        #print(rob.state_estimator.past_ctrl_actions)
         #rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/unicycle_flatness.json")
-        print('Collectiong Garbage')
-        gc.collect()
-        pass
+        #print('Collectiong Garbage')
+        #gc.collect()
+        print('allive')
         
 
         
