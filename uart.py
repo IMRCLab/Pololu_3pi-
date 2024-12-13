@@ -31,16 +31,23 @@ class Uart():
                 self.read = asyncio.create_task(self.read_uart())
 
     async def decode_uart(self):
-        await asyncio.sleep(1)        
+        await asyncio.sleep(1)  
+        drone_number = 0xe7      
         while True:
             try:
                 await asyncio.sleep(0.01)
                 buffer = await self.queue_receive.get()
+	        #print(buffer)
                 if buffer[0] == 0x6d and buffer[1] == 0x09: 
-                    x = struct.unpack('<h',buffer[3:5])[0]
-                    y = struct.unpack('<h',buffer[5:7])[0]
-                    z = struct.unpack('<h',buffer[7:9])[0]
-                    quaternion = Quaternion(int.from_bytes(buffer[9:13], 'little'))
+                    if drone_number == 0x08:
+                        new_buffer = buffer[:13]
+                    elif drone_number == 0xe7:
+                        new_buffer = buffer[13:]
+              	    #print(new_buffer)
+                    x = struct.unpack('<h',new_buffer[3:5])[0]
+                    y = struct.unpack('<h',new_buffer[5:7])[0]
+                    z = struct.unpack('<h',new_buffer[7:9])[0]
+                    quaternion = Quaternion(int.from_bytes(new_buffer[9:13], 'little'))
                     self.message_decode=(x,y,z,quaternion)
                 elif buffer[0] == 0x8f and buffer[1] == 0x05:
                     self.event.set()
