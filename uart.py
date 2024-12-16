@@ -37,17 +37,17 @@ class Uart():
             try:
                 await asyncio.sleep(0.01)
                 buffer = await self.queue_receive.get()
-	        #print(buffer)
+                #print(buffer)
                 if buffer[0] == 0x6d and buffer[1] == 0x09: 
                     if drone_number == 0x08:
-                        new_buffer = buffer[:13]
+                        new_buffer = buffer[2:13]
                     elif drone_number == 0xe7:
                         new_buffer = buffer[13:]
               	    #print(new_buffer)
-                    x = struct.unpack('<h',new_buffer[3:5])[0]
-                    y = struct.unpack('<h',new_buffer[5:7])[0]
-                    z = struct.unpack('<h',new_buffer[7:9])[0]
-                    quaternion = Quaternion(int.from_bytes(new_buffer[9:13], 'little'))
+                    x = struct.unpack('<h',new_buffer[1:3])[0]
+                    y = struct.unpack('<h',new_buffer[3:5])[0]
+                    z = struct.unpack('<h',new_buffer[5:7])[0]
+                    quaternion = Quaternion(int.from_bytes(new_buffer[7:11], 'little'))
                     self.message_decode=(x,y,z,quaternion)
                 elif buffer[0] == 0x8f and buffer[1] == 0x05:
                     self.event.set()
