@@ -83,7 +83,7 @@ class Control():
                 
                 theta_e_org = theta_d - theta
                 theta_e = atan2(sin(theta_d-theta), cos(theta_d-theta))
-                print(f'Theta Error Original:{theta_e_org}, Theta_e_new:{theta_e}')
+                #print(f'Theta Error Original:{theta_e_org}, Theta_e_new:{theta_e}')
                 print(f"Control Error: x:{x_e}, y:{y_e}, theta:{theta_e}")
                 
                 #compute unicycle-model control variables (forwards speed and rotational speed)
@@ -130,9 +130,9 @@ async def main():
     first_message_event = Event()
     connection = Uart(first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
-    rob.state_estimator.update_logfile_traj(trajectory[:3])
-    rob.state_estimator.create_csv()
-    rob.state_estimator.save_gains(gains)
+    #rob.state_estimator.update_logfile_traj(trajectory[:3])
+    #rob.state_estimator.create_csv()
+    #rob.state_estimator.save_gains(gains)
     while True:
         await asyncio.sleep(5)
         #print(rob.state_estimator.past_states)
