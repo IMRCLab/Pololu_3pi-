@@ -13,16 +13,16 @@ from uart import Uart
 
 
 class Control():
-    def __init__(self,robot:Robot,first_message:Event, event:Event, start_time:int, uart_handler:Uart, states:list, actions:list, gains:tuple) -> None:
+    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool) -> None:
         self._robot = robot
         self.event = event
         self.first_message = first_message
-        self._start_time = start_time
         self._states_mocap = uart_handler
         self._states = states
         self._actions = actions
         self.threshold = 0.05
         self.K_x, self.K_y, self.K_theta = gains 
+        self.logging = logging
         self.controller = asyncio.create_task(self.control())
 
     async def control(self)-> None:
@@ -84,8 +84,8 @@ class Control():
                 #print(f"Control Actions: omega:{omega_ctrl}, v:{v_ctrl}")
                 await asyncio.sleep(0)
                 #for logging
-                self._robot.state_estimator.last_v_ctrl = v_ctrl
-                self._robot.state_estimator.last_omega_ctrl = omega_ctrl
+                #self._robot.state_estimator.last_v_ctrl = v_ctrl
+                #self._robot.state_estimator.last_omega_ctrl = omega_ctrl
 
                 
                 
@@ -100,8 +100,9 @@ class Control():
                 await asyncio.sleep(0.00)
             except:
                 print('invalid message received')
-            if t % 0.2  < 0.2:
+            if t % 0.2  < 0.2 and self.logging:
                 pass
+                self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1],])
                 #self._robot.state_estimator.past_states.append([x, y, theta, t])
                 #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
                 #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
@@ -125,17 +126,14 @@ async def main():
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
-    control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
+    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging))
     if logging:
-        rob.state_estimator.update_logfile_traj(trajectory[:3])
-        rob.state_estimator.create_csv()
-        rob.state_estimator.save_gains(gains)
+        rob.state_estimator.create_logging_file(trajectory[:3],gains)
     while True:
         await asyncio.sleep(5)
         if logging:
-            print(rob.state_estimator.past_states)
-            print(rob.state_estimator.past_ctrl_actions)
-            rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/" + trajectory)
+            print(rob.state_estimator.past_values)
+            rob.state_estimator.write_past_values()
         print('Collectiong Garbage')
         gc.collect()
         print('allive')

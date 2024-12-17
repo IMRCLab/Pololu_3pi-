@@ -20,38 +20,71 @@ class State_Estimator():
         self.r = self.robot.r
 
         #for logging
+        """
         self.past_states = [] #list of past states of robot, along with time [x,y,theta,t]
         self.past_estimations = [] #list of values calculated in past state_estimate calls [uL,uR,t]
         self.past_ctrl_actions= []
+        self.desired_values = []
+        """
         self.last_v_ctrl = 0
         self.last_omega_ctrl = 0
-        self.desired_values = []
-
+        self.past_values = []
         ###for testing
         self.estimation_counter = 0
-        self.logfile_actions = self.create_filename('actions')
-        self.logfile_states = self.create_filename('states')
-        self.logfile_desired = self.create_filename("desired")
+        self.logfile = self.create_filename('logging')
 
-    def update_logfile_traj(self, traj:str) -> None:
-        self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
-        self.logfile_states = str(self.logfile_states[:6] + traj + '_' + self.logfile_states[6:])
-        self.logfile_desired = str(self.logfile_desired[:6] + traj + '_' + self.logfile_desired[6:])
-    
-    def save_gains(self,gains:tuple) -> None:
-        with open(self.logfile_states, 'a') as file:
+    def create_logging_file(self,traj:str,gains:tuple)-> None:
+        self.logfile = str(self.logfile[:6] + traj + '_' + self.logfile[6:])
+        with open(self.logfile, 'w') as file:
             # Write the headers
             line = ','.join(map(str, gains))  # Convert tuple to CSV line
             file.write('gains' + '\n')
             file.write(line + '\n')  # Write the line with a newline
+        
 
     def create_filename(self, file_type:str) -> str:
         localtime = time.localtime()
         h,m,s = localtime[3],localtime[4],localtime[5]
         run_name = f"{file_type}_{h}_{m}_{s}"
         #logfile = "/recordings/" + run_name
-        return "/logs/" + run_name + '.csv'
+        return "/logs/" + run_name + '.txt'
     
+        #prints information about the state on the display of the robot    
+    def display_state(self):
+        x,y,rad = self.state
+        theta = self.theta_easy
+        t = self.last_estimation - self.starttime
+        to_display = [f"x: {x}", f"y: {y}", f"deg: {theta}", f"rad: {rad} ",f"t {t / (10**9)}"]
+        #print(to_display)
+        self.robot.displaylist(to_display)  
+
+    #writes the recorded states and control actions, as well as the used trajectory & gains in a file of the log folder
+    #the file's name reflects the trajectory and the time where it was executed
+    def write_past_values(self):
+        with open(self.logfile, 'a') as file:
+            file.write(str(self.past_values))
+            
+            #for row in self.past_values:
+            #    file.write(','.join(map(str, row)) + '\n')
+
+        self.past_values = list()
+
+    """
+    def update_logfile_traj(self, traj:str) -> None:
+        self.logfile_actions = str(self.logfile_actions[:6] + traj + '_' + self.logfile_actions[6:])
+        self.logfile_states = str(self.logfile_states[:6] + traj + '_' + self.logfile_states[6:])
+        self.logfile_desired = str(self.logfile_desired[:6] + traj + '_' + self.logfile_desired[6:])
+    """
+    """
+    def save_gains(self,gains:tuple) -> None:
+        with open(self.logfile, 'a') as file:
+            # Write the headers
+            line = ','.join(map(str, gains))  # Convert tuple to CSV line
+            file.write('gains' + '\n')
+            file.write(line + '\n')  # Write the line with a newline
+    """
+    
+    """
     def create_csv(self) -> None:
         header_actions = ['v_ctrl','omega_ctrl']
         print(self.logfile_actions)
@@ -68,13 +101,13 @@ class State_Estimator():
         with open(self.logfile_desired, 'w+') as file:
             # Write the headers
             file.write(','.join(header_desired) + '\n')
-
+    """
 
 
 
         
 
-
+    """
     #according to the Timer API, the callback function MUST take an argument for the timer
     #even if it is not used
     def state_estimate(self, timerobject=None):
@@ -126,44 +159,19 @@ class State_Estimator():
             self.past_ctrl_actions.append([self.last_v_ctrl, self.last_omega_ctrl])
          
         return (self.state, t)
+    """
+
+
+
     
-    #prints information about the state on the display of the robot    
-    def display_state(self):
-        x,y,rad = self.state
-        theta = self.theta_easy
-        t = self.last_estimation - self.starttime
-        to_display = [f"x: {x}", f"y: {y}", f"deg: {theta}", f"rad: {rad} ",f"t {t / (10**9)}"]
-        #print(to_display)
-        self.robot.displaylist(to_display)  
-
-    #writes the recorded states and control actions, as well as the used trajectory & gains in a file of the log folder
-    #the file's name reflects the trajectory and the time where it was executed
-    def write_states_to_csv(self,traj:str = "",gains:tuple = ()):
-        
-        with open(self.logfile_actions, 'a') as file:
-            for row in self.past_ctrl_actions:
-                file.write(','.join(map(str, row)) + '\n')
-
-        with open(self.logfile_states, 'a') as file:
-            for row in self.past_states:
-                file.write(','.join(map(str, row)) + '\n')
-
-        with open(self.logfile_desired, "a") as file :
-            for row in self.desired_values:
-                file.write(','.join(map(str, row)) + '\n')
-        
-        self.desired_values = list()
-        self.past_states = list()
-        self.past_ctrl_actions = list()
-    
-            
+    """
     def start(self, turn_on):
         if turn_on == True :
             self.starttime = time.time_ns()
             self.timer.init(mode=Timer.PERIODIC, period=1, callback=self.state_estimate)
         if turn_on == False:
             self.timer.deinit()
-            
+    """
 
     
 #a few lines to test the basic functionality of odometry state estimation   
