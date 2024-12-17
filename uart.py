@@ -8,8 +8,9 @@ from asyncio import Event
 
 
 class Uart():
-    def __init__(self,first_message:Event,event:Event, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
+    def __init__(self,droneID:int,first_message:Event,event:Event, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
         self.uart =  UART(0,baudrate = baudrate, tx=Pin(txPin),rx=Pin(rxPin),bits = bits, parity= parity,stop=stop,rxbuf=rxbuf)
+        self.droneID = droneID
         self.event = event
         self.queue_receive = Queue()
         self.message_decode = tuple()
@@ -32,16 +33,15 @@ class Uart():
 
     async def decode_uart(self):
         await asyncio.sleep(1)  
-        drone_number = 0xe7      
         while True:
             try:
                 await asyncio.sleep(0.01)
                 buffer = await self.queue_receive.get()
                 #print(buffer)
                 if buffer[0] == 0x6d and buffer[1] == 0x09: 
-                    if drone_number == 0x08:
+                    if self.droneID == buffer[3]:
                         new_buffer = buffer[2:13]
-                    elif drone_number == 0xe7:
+                    elif self.droneID == buffer[13]:
                         new_buffer = buffer[13:]
               	    #print(new_buffer)
                     x = struct.unpack('<h',new_buffer[1:3])[0]
