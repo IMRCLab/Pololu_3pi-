@@ -35,11 +35,15 @@ class State_Estimator():
 
     def create_logging_file(self,traj:str,gains:tuple)-> None:
         self.logfile = str(self.logfile[:6] + traj + '_' + self.logfile[6:])
+        header = ["T","X", 'Y', "Theta","V_ctrl", "Omega_ctrl", "Index"]
+        line = ','.join(map(str, gains))  # Convert tuple to CSV line
         with open(self.logfile, 'w') as file:
+            file.write("Trajectory File")
+            file.write(traj)
             # Write the headers
-            line = ','.join(map(str, gains))  # Convert tuple to CSV line
             file.write('gains' + '\n')
             file.write(line + '\n')  # Write the line with a newline
+            file.write(str(header)+ '\n')
         
 
     def create_filename(self, file_type:str) -> str:

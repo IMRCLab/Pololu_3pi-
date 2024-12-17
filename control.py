@@ -102,8 +102,7 @@ class Control():
                 print('invalid message received')
             if t % 0.2  < 0.2 and self.logging:
                 pass
-                self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1],])
-                #self._robot.state_estimator.past_states.append([x, y, theta, t])
+                self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index])
                 #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
                 #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
  
