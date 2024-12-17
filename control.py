@@ -32,7 +32,7 @@ class Control():
         print('start control')
         run = True
         index = 0
-        finish_time = 3
+        finish_time = 5
         self._start_time = time.time_ns()
         while run: #TODO What happens if trajectory is done -> just stops right now 
             try:
@@ -47,10 +47,6 @@ class Control():
                 x = x/1000
                 y = y/1000
                 theta = state[3].yaw
-                if theta < 0: # might have to change when position of tracker deck moves
-                    theta += math.pi
-                else:
-                    theta -= math.pi
                 print("x "+str(x))
                 print("y "+str(y))
                 print("theta "+str(theta))
@@ -68,12 +64,8 @@ class Control():
                 await asyncio.sleep(0.0)
                 #get desired state and velocities
                 x_d, y_d, theta_d = self._states[index+1]
-                #print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}') # todo FINISHING CONDITION
-                y_d = 0
-                x_d = 0
-                theta_d = math.pi/2
-                #if abs(x_d -x) < self.threshold and abs(y_d -y) < self.threshold and abs(theta_d-theta) < self.threshold:
-                #index +=1
+                print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}') # todo FINISHING CONDITION
+
                 #print(index)
                 v_d, omega_d = self._actions[index]
 
