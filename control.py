@@ -109,30 +109,35 @@ class Control():
 
 from uart import Uart
 async def main():
-    rob = Robot()
     with open("/config/config.json","r") as f:
         config = json.load(f)
     trajectory = config["trajectory"]
     droneID = int(config['ID'],16)
+    logging = int(config['Logging'])
+    gains = tuple(config["Gains"])
+    max_speed_lvl = int(config["Max Speed"])
+    rob = Robot(max_speed_lvl=max_speed_lvl)
     with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
     states = data["result"]['states']
     ctrl_actions = data["result"]["actions"]
-    gains = tuple((6.5,9.5,5.0))
+    #gains = tuple((6.5,9.5,5.0))
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, start_time=time.time_ns(),uart_handler=connection,states=states,actions=ctrl_actions,gains=gains)
-    #rob.state_estimator.update_logfile_traj(trajectory[:3])
-    #rob.state_estimator.create_csv()
-    #rob.state_estimator.save_gains(gains)
+    if logging:
+        rob.state_estimator.update_logfile_traj(trajectory[:3])
+        rob.state_estimator.create_csv()
+        rob.state_estimator.save_gains(gains)
     while True:
         await asyncio.sleep(5)
-        #print(rob.state_estimator.past_states)
-        #print(rob.state_estimator.past_ctrl_actions)
-        #rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/unicycle_flatness.json")
-        #print('Collectiong Garbage')
-        #gc.collect()
+        if logging:
+            print(rob.state_estimator.past_states)
+            print(rob.state_estimator.past_ctrl_actions)
+            rob.state_estimator.write_states_to_csv(gains=gains, traj="/trajectories/" + trajectory)
+        print('Collectiong Garbage')
+        gc.collect()
         print('allive')
         
 

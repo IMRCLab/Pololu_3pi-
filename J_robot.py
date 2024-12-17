@@ -8,7 +8,7 @@ from J_state_estimator import State_Estimator
 from pololu_3pi_2040_robot import robot as three_pi_rob
 
 class Robot():
-    def __init__(self):
+    def __init__(self, max_speed_lvl:int):
         #specific to the 3pi+ robot
         self.r = 0.016      #wheel radius [m]
         self.L = 0.0862     #distance between wheels [m] (this is an approx)
@@ -16,7 +16,7 @@ class Robot():
         self.motors = three_pi_rob.Motors()
         self.display = three_pi_rob.Display()
         self.max_speed = 70*pi #max angular speed of the Hyper motors [rad/s]
-        self.max_speed_level = 900
+        self.max_speed_level = max_speed_lvl
         self.state_estimator = State_Estimator(robot=self)
         
         
