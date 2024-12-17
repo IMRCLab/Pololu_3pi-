@@ -30,6 +30,21 @@ class Uart():
             except MemoryError:
                 print('MemoryError: Receive')
                 self.read = asyncio.create_task(self.read_uart())
+    
+    def decode_message(self, buffer:bytearray) -> None:
+        if self.droneID == buffer[3]:
+            new_buffer = buffer[2:13]
+        elif self.droneID == buffer[13]:
+            new_buffer = buffer[13:]
+        else:
+            return
+        #print(new_buffer)
+        x = struct.unpack('<h',new_buffer[1:3])[0]
+        y = struct.unpack('<h',new_buffer[3:5])[0]
+        z = struct.unpack('<h',new_buffer[5:7])[0]
+        quaternion = Quaternion(int.from_bytes(new_buffer[7:11], 'little'))
+        self.message_decode=(x,y,z,quaternion)
+        return
 
     async def decode_uart(self):
         await asyncio.sleep(1)  
@@ -39,16 +54,7 @@ class Uart():
                 buffer = await self.queue_receive.get()
                 #print(buffer)
                 if buffer[0] == 0x6d and buffer[1] == 0x09: 
-                    if self.droneID == buffer[3]:
-                        new_buffer = buffer[2:13]
-                    elif self.droneID == buffer[13]:
-                        new_buffer = buffer[13:]
-              	    #print(new_buffer)
-                    x = struct.unpack('<h',new_buffer[1:3])[0]
-                    y = struct.unpack('<h',new_buffer[3:5])[0]
-                    z = struct.unpack('<h',new_buffer[5:7])[0]
-                    quaternion = Quaternion(int.from_bytes(new_buffer[7:11], 'little'))
-                    self.message_decode=(x,y,z,quaternion)
+                    self.decode_message(buffer=buffer)
                 elif buffer[0] == 0x8f and buffer[1] == 0x05:
                     self.event.set()
                     print('start Event received')
