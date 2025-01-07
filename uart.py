@@ -32,7 +32,7 @@ class Uart():
                 self.read = asyncio.create_task(self.read_uart())
     
     def decode_message(self, buffer:bytearray) -> None:
-        if self.droneID == buffer[3]:
+        if self.droneID == buffer[2]:
             new_buffer = buffer[2:13]
         elif self.droneID == buffer[13]:
             new_buffer = buffer[13:]
