@@ -42,7 +42,7 @@ class Control():
                 print(t)
                 index =  round(len(self._actions) * t / finish_time)
                 state = self._states_mocap.get_position()
-                #print(state)
+                print(state)
                 x,y,_,_ = state # TODO Add transformation for positions so real is accounted for not postion of marker deck 
                 x = x/1000
                 y = y/1000
@@ -100,8 +100,7 @@ class Control():
                 await asyncio.sleep(0.00)
             except:
                 print('invalid message received')
-            if t % 0.2  < 0.2 and self.logging:
-                pass
+            if t % 0.2  < 0.02 and self.logging:
                 self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index])
                 #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
                 #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
@@ -127,7 +126,8 @@ async def main():
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging))
     if logging:
-        rob.state_estimator.create_logging_file(trajectory[:3],gains)
+        rob.state_estimator.create_logging_file(trajectory,gains)
+    # display readiness 
     while True:
         await asyncio.sleep(5)
         if logging:
