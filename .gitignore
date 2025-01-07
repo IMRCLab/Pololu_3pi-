@@ -27,6 +27,8 @@ siren.py
 spin.py
 sys_info.py
 wall_bumper.py
+settings.json
+.vscode/settings.json
 
 trajectories/curve_1_5_3.pdf
 **.pdf

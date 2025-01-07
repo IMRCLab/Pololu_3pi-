@@ -3,5 +3,6 @@
     "ID" : "0xe7",
     "Logging" : 0,
     "Gains" : [6.5,9.5,5.0],
-    "Max Speed" : 6000
+    "Max Speed" : 6000,
+    "Path Duration" : 5
 }
