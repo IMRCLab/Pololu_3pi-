@@ -9,11 +9,12 @@ import uasyncio as asyncio
 from asyncio import Event
 import gc
 from uart import Uart
+from state_display import StateDisplay
 
 
 
 class Control():
-    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool) -> None:
+    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay) -> None:
         self._robot = robot
         self.event = event
         self.first_message = first_message
@@ -23,6 +24,7 @@ class Control():
         self.threshold = 0.05
         self.K_x, self.K_y, self.K_theta = gains 
         self.logging = logging
+        self.car = car
         self.controller = asyncio.create_task(self.control())
 
     async def control(self)-> None:
@@ -30,6 +32,7 @@ class Control():
         await self.event.wait()
         await self.first_message.wait()
         print('start control')
+        self.car.driving()
         run = True
         index = 0
         finish_time = 5
@@ -59,6 +62,7 @@ class Control():
                     self._robot.motors.off()
                     run = False
                     #self._robot.state_estimator.write_states_to_csv(gains=(self.K_x,self.K_y,self.K_theta), traj="/trajectories/unicycle_flatness.json")
+                    self.car.finish()
                     break
                 
                 await asyncio.sleep(0.0)
@@ -98,13 +102,14 @@ class Control():
                 self._robot.motors.set_speeds(u_L, u_R)
                 #print(f'Free Memory {gc.mem_free()}')
                 await asyncio.sleep(0.00)
+                if t % 0.2  < 0.02 and self.logging:
+                    self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index])
+                    #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
+                    #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
+ 
             except:
                 print('invalid message received')
-            if t % 0.2  < 0.02 and self.logging:
-                self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index])
-                #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
-                #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
- 
+            
 
 from uart import Uart
 async def main():
@@ -116,6 +121,7 @@ async def main():
     gains = tuple(config["Gains"])
     max_speed_lvl = int(config["Max Speed"])
     rob = Robot(max_speed_lvl=max_speed_lvl)
+    car = StateDisplay()
     with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
     states = data["result"]['states']
@@ -124,10 +130,10 @@ async def main():
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
-    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging))
+    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
-    # display readiness 
+    car.ready()# display readiness 
     while True:
         await asyncio.sleep(5)
         if logging:
