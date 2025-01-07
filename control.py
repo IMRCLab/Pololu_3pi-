@@ -14,7 +14,7 @@ from state_display import StateDisplay
 
 
 class Control():
-    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay) -> None:
+    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay,path_duration:float) -> None:
         self._robot = robot
         self.event = event
         self.first_message = first_message
@@ -25,6 +25,7 @@ class Control():
         self.K_x, self.K_y, self.K_theta = gains 
         self.logging = logging
         self.car = car
+        self.path_duration = path_duration
         self.controller = asyncio.create_task(self.control())
 
     async def control(self)-> None:
@@ -35,7 +36,6 @@ class Control():
         self.car.driving()
         run = True
         index = 0
-        finish_time = 5
         self._start_time = time.time_ns()
         while run: #TODO What happens if trajectory is done -> just stops right now 
             try:
@@ -43,7 +43,7 @@ class Control():
                 t = time.time_ns() - self._start_time
                 t *= (10**-9)
                 print(t)
-                index =  round(len(self._actions) * t / finish_time)
+                index =  round(len(self._actions) * t / self.path_duration)
                 state = self._states_mocap.get_position()
                 print(state)
                 x,y,_,_ = state # TODO Add transformation for positions so real is accounted for not postion of marker deck 
@@ -120,6 +120,7 @@ async def main():
     logging = int(config['Logging'])
     gains = tuple(config["Gains"])
     max_speed_lvl = int(config["Max Speed"])
+    path_duration = config["Path Duration"]
     rob = Robot(max_speed_lvl=max_speed_lvl)
     car = StateDisplay()
     with open("/trajectories/" + trajectory,"r") as f:
@@ -130,7 +131,7 @@ async def main():
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
-    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car)
+    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, path_duration=path_duration)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
     car.ready()# display readiness 
