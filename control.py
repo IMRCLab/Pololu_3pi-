@@ -125,8 +125,12 @@ async def main():
     car = StateDisplay()
     with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
-    states = data["result"]['states']
-    ctrl_actions = data["result"]["actions"]
+    try:
+        states = data["result"]['states']
+        ctrl_actions = data["result"]["actions"]
+    except:
+        states = data["result"][0]['states']
+        ctrl_actions = data["result"][0]["actions"]
     #gains = tuple((6.5,9.5,5.0))
     start_event = Event()
     first_message_event = Event()
