@@ -2,6 +2,7 @@ import time   #is this precise enough or should I use some time module of the 3p
 from math import sin, cos, pi
 from J_maths_module import *
 from machine import Timer
+import random
 
 class State_Estimator():
     def __init__(self, robot): 
@@ -49,7 +50,7 @@ class State_Estimator():
     def create_filename(self, file_type:str) -> str:
         localtime = time.localtime()
         h,m,s = localtime[3],localtime[4],localtime[5]
-        run_name = f"{file_type}_{h}_{m}_{s}"
+        run_name = f"{file_type}_{h}_{m}_{s}_{random.randint(0,1000)}"
         #logfile = "/recordings/" + run_name
         return "/logs/" + run_name + '.txt'
     
