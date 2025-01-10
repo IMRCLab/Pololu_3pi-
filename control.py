@@ -26,18 +26,21 @@ class Control():
         self.logging = logging
         self.car = car
         self.path_duration = path_duration
+        self._run:bool = True
         self.controller = asyncio.create_task(self.control())
 
+    def running(self) -> bool:
+        return self._run
     async def control(self)-> None:
         await asyncio.sleep(1)
         await self.event.wait()
         await self.first_message.wait()
         print('start control')
         self.car.driving()
-        run = True
+        self._run = True
         index = 0
         self._start_time = time.time_ns()
-        while run: #TODO What happens if trajectory is done -> just stops right now 
+        while self._run: #TODO What happens if trajectory is done -> just stops right now 
             try:
                 await asyncio.sleep(0)
                 t = time.time_ns() - self._start_time
@@ -60,9 +63,9 @@ class Control():
                 if index >= len(self._actions)-1:
                     print("no more action left : goal should be reached")
                     self._robot.motors.off()
-                    run = False
+                    self._run = False
                     #self._robot.state_estimator.write_states_to_csv(gains=(self.K_x,self.K_y,self.K_theta), traj="/trajectories/unicycle_flatness.json")
-                    self.car.finish()
+                    self.car.finish_driving()
                     break
                 
                 await asyncio.sleep(0.0)
@@ -142,6 +145,9 @@ async def main():
     while True:
         await asyncio.sleep(5)
         if logging:
+            if rob.state_estimator.past_values == [] and not control.running():
+                logging = False
+                car.finish_saving()
             print(rob.state_estimator.past_values)
             rob.state_estimator.write_past_values()
         print('Collectiong Garbage')
