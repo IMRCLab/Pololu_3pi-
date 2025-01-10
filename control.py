@@ -33,8 +33,11 @@ class Control():
         return self._run
     async def control(self)-> None:
         await asyncio.sleep(1)
-        await self.event.wait()
         await self.first_message.wait()
+        self.car.ready()
+
+        await self.event.wait()
+        
         print('start control')
         self.car.driving()
         self._run = True
@@ -141,7 +144,6 @@ async def main():
     control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, path_duration=path_duration)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
-    car.ready()# display readiness 
     while True:
         await asyncio.sleep(5)
         if logging:
