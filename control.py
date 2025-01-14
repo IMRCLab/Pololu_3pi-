@@ -96,8 +96,6 @@ class Control():
                 #for logging
                 #self._robot.state_estimator.last_v_ctrl = v_ctrl
                 #self._robot.state_estimator.last_omega_ctrl = omega_ctrl
-
-                
                 
                 #transform unicycle-model variables v_ctrl and omega_ctrl to differential-drive
                 #model control variables (angular speed of wheels) 
@@ -126,7 +124,7 @@ async def main():
     logging = int(config['Logging'])
     gains = tuple(config["Gains"])
     max_speed_lvl = int(config["Max Speed"])
-    path_duration = config["Path Duration"]
+    
     rob = Robot(max_speed_lvl=max_speed_lvl)
     car = StateDisplay()
     with open("/trajectories/" + trajectory,"r") as f:
@@ -138,18 +136,22 @@ async def main():
         states = data["result"][0]['states']
         ctrl_actions = data["result"][0]["actions"]
     #gains = tuple((6.5,9.5,5.0))
+    path_duration = len(states)/10    
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
     control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, path_duration=path_duration)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
+    # TODO maybe add wait for start_event here 
+    await start_event.wait()
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(10)
         if logging:
             if rob.state_estimator.past_values == [] and not control.running():
                 logging = False
                 car.finish_saving()
+            print("Free memory:", gc.mem_free())            
             print(rob.state_estimator.past_values)
             rob.state_estimator.write_past_values()
         print('Collectiong Garbage')
