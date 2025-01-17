@@ -24,7 +24,7 @@ class Uart():
             try:
                 await asyncio.sleep(0.01)
                 if self.uart.any():
-                    new_buffer = bytearray(32)
+                    new_buffer = bytearray(48)
                     self.uart.readinto(new_buffer)
                     self.queue_receive.put_nowait(new_buffer) 
             except MemoryError:
