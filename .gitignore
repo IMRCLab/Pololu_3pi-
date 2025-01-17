@@ -34,3 +34,4 @@ trajectories/curve_1_5_3.pdf
 **.csv
 trajectories/line_1_4_4.pdf
 test.py
+path_generator.py
