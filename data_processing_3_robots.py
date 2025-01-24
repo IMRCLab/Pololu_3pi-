@@ -53,8 +53,8 @@ def align_to_time_base(reference_time_base: np.ndarray, data: np.ndarray, time_c
             aligned_data.append(matching_rows[0])  # Take the first matching row
         else:
             try:
-                last_row = data[np.abs(data[:, time_col_index] - (t_ref-0.2)) <= tolerance]
-                next_row = data[np.abs(data[:, time_col_index] - (t_ref+0.2)) <= tolerance]
+                last_row = data[np.abs(data[:, time_col_index] - (t_ref-0.5)) <= tolerance]
+                next_row = data[np.abs(data[:, time_col_index] - (t_ref+0.5)) <= tolerance]
             except:
                 print('last or next value not found')
             alpha = 0.5
@@ -133,11 +133,11 @@ def combine_data(folder_path: str, tolerance: float) -> dict:
     combined_desired_actions = []
     state_row = []
     action_row = []        
-    for j, (values1,values2) in enumerate(zip(desired_data[0]["result"]["states"],desired_data[1]["result"]["states"])):
-        state_row.append([j*0.1,values1[0],values1[1],values1[2],values2[0],values2[1],values2[2]])
+    for j, (values1,values2,values3) in enumerate(zip(desired_data[0]["result"]["states"],desired_data[1]["result"]["states"],desired_data[2]["result"]["states"])):
+        state_row.append([j*0.1,values1[0],values1[1],values1[2],values2[0],values2[1],values2[2],values3[0],values3[1],values3[2]])
         
-    for k, (values1,values2) in enumerate(zip(desired_data[0]["result"]["actions"],desired_data[1]["result"]["actions"])):
-        action_row.append([k*0.1,values1[0],values1[1],values2[0],values2[1]])
+    for k, (values1,values2,values3) in enumerate(zip(desired_data[0]["result"]["actions"],desired_data[1]["result"]["actions"],desired_data[2]["result"]["actions"])):
+        action_row.append([k*0.1,values1[0],values1[1],values2[0],values2[1],values3[0],values3[1]])
 
     combined_desired_states.append(state_row)
     combined_desired_actions.append(action_row)
@@ -150,16 +150,21 @@ def calculate_error(data:dict):
     desired_states = data["desired_states"][0]
     error1 = []
     error2 = []
+    error3 = []
     for state in states:
         desired_state1 = desired_states[int(state[4])]
         error1.append([desired_state1[1]-state[1],desired_state1[2]-state[2],desired_state1[3]-state[3]])
-        desired_state2 = desired_states[int(state[-1])]
+        desired_state2 = desired_states[int(state[8])]
         error2.append([desired_state2[4]-state[5],desired_state2[5]-state[6],desired_state2[6]-state[7]]) # 567
+        desired_state3 = desired_states[int(state[-1])]
+        error3.append([desired_state2[7]-state[9],desired_state2[8]-state[10],desired_state2[9]-state[11]])
     data["e1"] = error1
     data["e2"] = error2
+    data["e3"] = error3
     error1_norm = [np.linalg.norm(item) for item in error1 ]
     error2_norm = [np.linalg.norm(item) for item in error2]
-    avarege_timestep = [(item1 + item2)/2 for (item1,item2) in zip(error1_norm,error2_norm)]
+    error3_norm = [np.linalg.norm(item) for item in error3]
+    avarege_timestep = [(item1 + item2 +item3)/3 for (item1,item2,item3) in zip(error1_norm,error2_norm, error3_norm)]
     data["mean_error"] = float(sum(avarege_timestep) / len(avarege_timestep))
 
 def save_to_yaml(data: dict, output_file: str) -> None:
@@ -181,7 +186,7 @@ if __name__ == "__main__":
         print("Usage: python script.py <folder_path> [tolerance]")
         sys.exit(1)
     folder = sys.argv[1]
-    tolerance = float(sys.argv[2]) if len(sys.argv) > 2 else 0.02  # Default tolerance is 0.02
+    tolerance = float(sys.argv[2]) if len(sys.argv) > 2 else 0.05  # Default tolerance is 0.02
 
     # Determine output file name from folder name
     folder_name = os.path.basename(os.path.normpath(folder))
