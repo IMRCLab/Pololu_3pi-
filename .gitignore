@@ -1,6 +1,4 @@
 .Trash-1000
-pololu_3pi_2040_robot
-logs
 licenses
 3pi-polulu-
 pymakr.conf
@@ -27,9 +25,13 @@ siren.py
 spin.py
 sys_info.py
 wall_bumper.py
-
+settings.json
+.vscode
+.micropico
+3PI.code-workspace
 trajectories/curve_1_5_3.pdf
 **.pdf
 **.csv
 trajectories/line_1_4_4.pdf
 test.py
+path_generator.py
