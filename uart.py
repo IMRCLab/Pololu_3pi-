@@ -57,9 +57,11 @@ class Uart():
                 await asyncio.sleep(0.01)
                 buffer = await self.queue_receive.get()
                 #print(buffer)
-                if buffer[0] == 0x6d and buffer[1] == 0x09: 
+                #elif buffer[0] == 0x6e and buffer[1] == 0x0e: #TODO ADDthis to dongle c code to filter for drone messages 
+				#	self.decode_message(buffer=buffer[8:])	 # change channel to 80
+                if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
-                elif buffer[0] == 0x8f and buffer[1] == 0x05:
+                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05:
                     self.event.set()
                     print('start Event received')
                     continue
