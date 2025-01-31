@@ -17,22 +17,32 @@ class Uart():
         self.read = asyncio.create_task(self.read_uart())
         self.decode = asyncio.create_task(self.decode_uart())
         self.first_message = first_message
-    
+        self.buffer = bytearray(1)
+
     async def read_uart(self):
         await asyncio.sleep(1)
         while True:
             try:
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.001)
                 if self.uart.any():
                     buffer_len = bytearray(1)
                     self.uart.readinto(buffer_len)
-                    new_buffer = bytearray(buffer_len[0])
-                    self.uart.readinto(new_buffer)
-                    self.queue_receive.put_nowait(new_buffer) 
-            except MemoryError:
-                print('MemoryError: Receive')
+                    # print(buffer_len)
+                    if buffer_len[0] in [0x18, 10]:                       
+                        new_buffer = bytearray(buffer_len[0])
+                        self.uart.readinto(new_buffer)
+                        # print(buffer_len + new_buffer)
+                        self.queue_receive.put_nowait(buffer_len[1:] + new_buffer) 
+                        # print("message_send")
+            # except MemoryError:
+            #     print('MemoryError: Receive')
+            #     self.read = asyncio.create_task(self.read_uart())
+            except IndexError:
+                print('IndexError: Receive')
                 self.read = asyncio.create_task(self.read_uart())
-    
+
+        
+        
     def decode_message(self, buffer:bytearray) -> None:
         if self.droneID == buffer[2]:
             new_buffer = buffer[2:13]
@@ -52,11 +62,9 @@ class Uart():
         await asyncio.sleep(1)  
         while True:
             try:
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.001)
                 buffer = await self.queue_receive.get()
                 #print(buffer)
-                #elif buffer[0] == 0x6e and buffer[1] == 0x0e: #TODO ADDthis to dongle c code to filter for drone messages 
-				#	self.decode_message(buffer=buffer[8:])	 # change channel to 80
                 if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
                 elif (buffer[0] & 0xf3) == 0x83 and buffer[1] == 0x05:
