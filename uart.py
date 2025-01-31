@@ -24,7 +24,9 @@ class Uart():
             try:
                 await asyncio.sleep(0.01)
                 if self.uart.any():
-                    new_buffer = bytearray(48)
+                    buffer_len = bytearray(1)
+                    self.uart.readinto(buffer_len)
+                    new_buffer = bytearray(buffer_len[0])
                     self.uart.readinto(new_buffer)
                     self.queue_receive.put_nowait(new_buffer) 
             except MemoryError:
@@ -61,7 +63,7 @@ class Uart():
 				#	self.decode_message(buffer=buffer[8:])	 # change channel to 80
                 if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
-                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05:
+                elif (buffer[0] & 0xf3) == 0x83 and buffer[1] == 0x05:
                     self.event.set()
                     print('start Event received')
                     continue
