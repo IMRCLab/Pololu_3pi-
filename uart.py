@@ -38,10 +38,6 @@ class Uart():
             new_buffer = buffer[2:13]
         elif self.droneID == buffer[13]:
             new_buffer = buffer[13:24]
-        elif self.droneID == buffer[26]:
-            new_buffer = buffer[26:37]
-        elif self.droneID == buffer[37]:
-            new_buffer = buffer[37:]
         else:
             return
         #print(new_buffer)
