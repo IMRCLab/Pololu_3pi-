@@ -67,7 +67,7 @@ class Uart():
                 #print(buffer)
                 if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
-                elif (buffer[0] & 0xf3) == 0x83 and buffer[1] == 0x05:
+                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05:
                     self.event.set()
                     print('start Event received')
                     continue
