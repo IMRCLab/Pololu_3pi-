@@ -1,3 +1,115 @@
+# Pololu 3pi+ RP2040 Robot Development Repository
+
+This repository contains code and resources for the Pololu 3pi+ RP2040 Robot, powered by the Raspberry Pi RP2040 microcontroller. The robot is a versatile platform for experimentation and learning, featuring motor drivers, sensors, and support for various programming configurations.
+Repository Structure
+
+- **config/**: Contains configuration files that define various operational parameters for the robot. These configurations influence how different operational modes in the robot's control system behave.
+
+- **trajectories/** : Contains the trajectory files in .json format
+
+- **control.py**: A core script that manages different operational modes for the robot. This script allows the robot to switch between distinct behaviors depending on user input or pre-defined conditions.
+
+## Configuration Files
+
+The config/ directory is crucial for customizing the robot's behavior. It contains JSON files that specify parameters such as speed limits, sensor thresholds, and control gains. By modifying these files, users can fine-tune the robot's performance to suit specific tasks or environments.
+Getting Started
+### 1. Setup Instructions
+
+- Connect the Pololu 3pi+ RP2040 to your computer.
+
+- But the Robot into bootloader mode restarting it and pressing the b button
+
+- Download the newest version of the Pololu firmware and load it on to the device
+
+    - Further Instructions https://www.pololu.com/docs/0J86/all#5.1
+
+    - Firmware Versions : https://github.com/pololu/micropython-build/releases
+
+- Delete all of the contents from the Micropython folder
+
+- Pull from https://github.com/IMRCLab/Pololu_3pi-.git 0xe7
+
+### 2. Configuration
+
+Modify the configuration files in the config/ folder to customize parameters for different operational modes. Ensure that the JSON syntax is correct to prevent runtime errors.
+
+Customize the following values
+
+- ID
+- trajectory
+- Logging
+
+## Running a Trajectory
+
+To run a trajectory one just needs to start the robot and ensure that the launch script is running that is responsible for the communication with the MoCap.
+The robots running sequence can be divided into the following segments:
+#### Start
+
+Is the state right after the start of the robot. In this mode the screen should be black. All of the processes are being initialized. The robot is waiting for position information from the robot.
+#### Ready
+
+In this mode positional information already has been received, the robot is ready and waiting for the start signal.
+
+Display Output :
+```
+READY
+______
+/|_||_\`.__
+( _ _ _
+=`-(_)--(_)-'
+-- --- --- --- -
+READY
+```
+#### Driving
+
+The robot received the start signal and starts driving.
+
+Display Output :
+```
+DRIVING...
+______
+/|_||_\`.__
+( _ _ _
+=`-(_)--(_)-'
+-- --- --- --- -
+DRIVING...
+```
+#### Done Driving
+
+The trajectory is completed, the projected time of the trajectory has been reached.
+
+Display Output :
+
+```
+----------------
+| ______ |
+| /|_||_\`.__ |
+|( _ _ _\ |
+|=`-(_)--(_)-' |
+----------------
+DONE DRIVING
+```
+#### Done Saving
+
+If Logging is enabled, all available data has been saved to the drive
+
+Display Output :
+```
+----------------
+| ______ |
+| /|_||_\`.__ |
+|( _ _ _\ |
+|=`-(_)--(_)-' |
+----------------
+DONE SAVING
+```
+
+## Common Issues 
+
+## Details 
+The controller is based on the Collective Intelligence from a Synthetic and Biological Perspective Summer School of which Prof. W. Hönig was one of the organizers. For more information about the differential drive controler
+check out the /collision_avoidance/slides.pdf of the slides available on the website.
+<!---
 This repository contains code for the 3pi+ 2040 Pololu Ground Robot (written for Hyper edition, but should work for all), as well as some 3d printable files and instructions for attaching and connecting the nrf52840 radio dongle onto it. <br /> 
 The code contains a simple state estimator based on odometry readings and a simple differential drive controler. To make gain tuning easier, you can choose a trajectory from a selection of three(straight line, pure rotation, slightly wavy diagonal)
 and adjust the gains (Kx, Ky, Ktheta) you want to use directly with the robot buttons. (These two options are enabled by default). The state estimator logs some data of interest and there is also a script which plots this into neatly readable graphs.
@@ -34,3 +146,4 @@ References : <br />
 Collective Intelligence from a Synthetic and Biological Perspective Summer School :       http://modelai.gettysburg.edu/2024/collective/  <br />
 Pololu 3pi+ 2040 User guide :     https://www.pololu.com/docs/0J86/all  <br />
 Dynobench : https://github.com/quimortiz/dynobench/tree/05bafb374e5b00e858d351e2e89d8f4b409f56ab  <br />
+-->
