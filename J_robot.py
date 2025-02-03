@@ -8,7 +8,7 @@ from J_state_estimator import State_Estimator
 from pololu_3pi_2040_robot import robot as three_pi_rob
 
 class Robot():
-    def __init__(self):
+    def __init__(self, max_speed_lvl:int):
         #specific to the 3pi+ robot
         self.r = 0.016      #wheel radius [m]
         self.L = 0.0862     #distance between wheels [m] (this is an approx)
@@ -16,7 +16,7 @@ class Robot():
         self.motors = three_pi_rob.Motors()
         self.display = three_pi_rob.Display()
         self.max_speed = 70*pi #max angular speed of the Hyper motors [rad/s]
-        
+        self.max_speed_level = max_speed_lvl
         self.state_estimator = State_Estimator(robot=self)
         
         
@@ -41,9 +41,12 @@ class Robot():
     def angular_speed_to_motor_speed(self, speed):
         increment = self.max_speed/6000 #increment is 7pi/600, approx 0.0367 [rad/s]
         level = speed // increment
-        if speed > 6000 :
+        if speed > self.max_speed_level :
             print("angular speed higher than maximum speed of the 3pi+ Hyper")
-            level = 6000
+            level = self.max_speed_level
+        elif speed < -self.max_speed_level:
+            print("angular speed lower than minimum speed of the 3pi+ Hyper")
+            level = -self.max_speed_level
         return level
   
     #print info about the current state on the display
@@ -52,12 +55,12 @@ class Robot():
         theta = self.state_estimator.theta_easy
         t = self.state_estimator.last_estimation - self.state_estimator.starttime
         to_display = [f"x: {x}", f"y: {y}", f"deg: {theta}", f"rad: {rad} ",f"t {t / (10**9)}"]
-        displaylist(to_display)
+        self.displaylist(to_display)
 
     
     def set_gains(self) -> tuple:
-        gains = [1,1,1]
-        gain_nr = 0 #0 = Kx, 1 = Ky, 2 = Ktheta
+        gains = [1.0,1.0,1.0]
+        gain_nr = 0.0 #0 = Kx, 1 = Ky, 2 = Ktheta
         which_gain = {0:'K_x', 1:'K_y', 2:'K_theta'}
         power = 0
         increment = 0.1
@@ -75,8 +78,8 @@ class Robot():
                 gain_nr = (gain_nr + 1) % 3
                 
             display.fill(0)
-            display.text(f"Tuning {which_gain[gain_nr]}", 0, 0)
-            display.text("value: " + str(gains[gain_nr]), 0, 8)
+            display.text(f"Tuning {which_gain[int(gain_nr)]}", 0, 0)
+            display.text("value: " + str(gains[int(gain_nr)]), 0, 8)
             display.text(f"increment {increment}", 0,16)
             display.text(f"A: +   B: - ",0,24)
             display.text(f"C: incrementx10",0,32)
@@ -85,9 +88,9 @@ class Robot():
             display.text(f"Right: change K",0,56)
 
             if button_a.check():
-                gains[gain_nr] += 1 * increment
+                gains[int(gain_nr)] += 1 * increment
             if button_b.check():
-                gains[gain_nr] -= 1 * increment
+                gains[int(gain_nr)] -= 1 * increment
             if button_c.check():
                 power = ((power + 1) % 5)   #that way we can go 10^-1 to 10^3
                 increment = 10**(power-1)
@@ -102,6 +105,7 @@ class Robot():
     def choose_traj(self):
         display = three_pi_rob.Display()
         bump_sensors = three_pi_rob.BumpSensors()
+        button_b = three_pi_rob.ButtonB()
         button_a = three_pi_rob.ButtonA()
         bump_sensors.calibrate()
         
@@ -109,19 +113,19 @@ class Robot():
         traj_list = ["line","rotation","curve"]
         while True:
             bump_sensors.read()
-            if bump_sensors.right.check():
+            if button_a.check():
                 index = (index + 1) % 3
                 display.fill(0)
                 print(index)
-            if button_a.check(): 
+            if button_b.check(): 
                 print(index)
                 return "/trajectories/" + traj_list[index] + ".json"
             display.text(f"Choose traj", 0, 0)
             display.text("StraightLine", 0, 16)
             display.text(f"rotation", 0,24)
             display.text(f"Curve",0,32)  
-            display.text(f"R_Bumper: change", 0,48)
-            display.text(f"A : select",0,56)
+            display.text(f"A: change", 0,48)
+            display.text(f"B : select",0,56)
             display.text("<-", 100, (index+2)*8)
             display.show()
             

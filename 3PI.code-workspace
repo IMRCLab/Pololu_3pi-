@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "serial://dev/ttyACM0",
+			"uri": "serial:///dev/ttyacm0/"
+		}
+	],
+	"settings": {
+		"python.languageServer": "Pylance"
+	}
+}
