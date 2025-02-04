@@ -104,11 +104,32 @@ Display Output :
 DONE SAVING
 ```
 
-## Common Issues 
+## Usage of multiple robots
 
+It is recommended to use a 50Hz update rate in the MoCap software, higher frequencies might also work, but have not been tested.
+
+## Development
+
+A common tool for debugging is the [Thonny](https://thonny.org/) ide. It allows for a [simple connection](https://www.pololu.com/docs/0J86/all#5.3) to the MCU on the RP2040 and allows to run programms in the console. For the rest of the development VSC with [MicroPico](https://marketplace.visualstudio.com/items?itemName=paulober.pico-w-go) was used, because of the many usefull tools it has to offer, like code suggestions and git integration.  
+
+## Common Issues
+
+### Pololu Drive in Read Only mode
+A quick way to fix this issue is to update the firmware and install the software again.
+### The robot is in Driving Mode but doesnt drive
+This usually means that the incoming messages are either decoded incorrectly.
+### Pololu
 ## Details 
-The controller is based on the Collective Intelligence from a Synthetic and Biological Perspective Summer School of which Prof. W. Hönig was one of the organizers. For more information about the differential drive controler
-check out the /collision_avoidance/slides.pdf of the slides available on the website.
+The controller is based on the Collective Intelligence from a Synthetic and Biological Perspective Summer School of which Prof. W. Hönig was one of the organizers. For more information about the differential drive controller
+check out the [/collision_avoidance/slides.pdf](http://modelai.gettysburg.edu/2024/collective/slides/slides.zip) of the slides available on the website.
+
+## References 
+Collective Intelligence from a Synthetic and Biological Perspective Summer School : http://modelai.gettysburg.edu/2024/collective/
+
+Pololu 3pi+ 2040 User guide : https://www.pololu.com/docs/0J86/all
+
+Dynobench : https://github.com/quimortiz/dynobench/tree/05bafb374e5b00e858d351e2e89d8f4b409f56ab 
+
 <!---
 This repository contains code for the 3pi+ 2040 Pololu Ground Robot (written for Hyper edition, but should work for all), as well as some 3d printable files and instructions for attaching and connecting the nrf52840 radio dongle onto it. <br /> 
 The code contains a simple state estimator based on odometry readings and a simple differential drive controler. To make gain tuning easier, you can choose a trajectory from a selection of three(straight line, pure rotation, slightly wavy diagonal)
@@ -140,10 +161,5 @@ If the robot has very weird behavior (sudden acceleration in the wrong direction
 
 It happened two times that 3pi+ suddenly locked up its permissions and didn't allow me to modify, delete or add files (no write access). Using chmod command did not work as I got the response "read-only filesystem". The solution I found was updating the MicroPython firmware again (see 3pi+ 2040 user guide ; careful this will delete all custom files on the 3pi+) and then I could do chmod to get write access
 
-
-
 References : <br />
-Collective Intelligence from a Synthetic and Biological Perspective Summer School :       http://modelai.gettysburg.edu/2024/collective/  <br />
-Pololu 3pi+ 2040 User guide :     https://www.pololu.com/docs/0J86/all  <br />
-Dynobench : https://github.com/quimortiz/dynobench/tree/05bafb374e5b00e858d351e2e89d8f4b409f56ab  <br />
 -->
