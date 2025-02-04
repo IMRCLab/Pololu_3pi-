@@ -14,7 +14,7 @@ from state_display import StateDisplay
 
 
 class Control():
-    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay,path_duration:float) -> None:
+    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay,logging_interval:float) -> None:
         self._robot = robot
         self.event = event
         self.first_message = first_message
@@ -24,8 +24,9 @@ class Control():
         self.threshold = 0.05
         self.K_x, self.K_y, self.K_theta = gains 
         self.logging = logging
+        self.logging_interval = logging_interval
         self.car = car
-        self.path_duration = path_duration
+        self.path_duration = len(states)/10
         self._run:bool = True
         self.controller = asyncio.create_task(self.control())
 
@@ -43,7 +44,7 @@ class Control():
         self._run = True
         index = 0
         self._start_time = time.time_ns()
-        while self._run: #TODO What happens if trajectory is done -> just stops right now 
+        while self._run:
             try:
                 await asyncio.sleep(0)
                 t = time.time_ns() - self._start_time
@@ -52,7 +53,7 @@ class Control():
                 index =  round(len(self._actions) * t / self.path_duration)
                 state = self._states_mocap.get_position()
                 print(state)
-                x,y,_,_ = state # TODO Add transformation for positions so real is accounted for not postion of marker deck 
+                x,y,_,_ = state 
                 x = x/1000
                 y = y/1000
                 theta = state[3].yaw
@@ -61,20 +62,18 @@ class Control():
                 print("theta "+str(theta))
                 print(t)
                 print(f"action i:{index} ; state i:{index}")
-                # TODO take states and actions according to time 
                 #get desired state and velocities
                 if index >= len(self._actions)-1:
                     print("no more action left : goal should be reached")
                     self._robot.motors.off()
                     self._run = False
-                    #self._robot.state_estimator.write_states_to_csv(gains=(self.K_x,self.K_y,self.K_theta), traj="/trajectories/unicycle_flatness.json")
                     self.car.finish_driving()
                     break
                 
                 await asyncio.sleep(0.0)
                 #get desired state and velocities
                 x_d, y_d, theta_d = self._states[index+1]
-                print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}') # todo FINISHING CONDITION
+                print(f'x_d:{x_d}; y_d:{y_d}; theta_d:{theta_d}')
 
                 #print(index)
                 v_d, omega_d = self._actions[index]
@@ -86,31 +85,22 @@ class Control():
                 theta_e_org = theta_d - theta
                 theta_e = atan2(sin(theta_d-theta), cos(theta_d-theta))
                 print(f'Theta Error Original:{theta_e_org}, Theta_e_new:{theta_e}')
-                #print(f"Control Error: x:{x_e}, y:{y_e}, theta:{theta_e}")
                 
                 #compute unicycle-model control variables (forwards speed and rotational speed)
                 v_ctrl = v_d*cos(theta_e) + self.K_x * x_e
                 omega_ctrl = omega_d + v_d*(self.K_y*y_e + self.K_theta*sin(theta_e)) + self.K_theta*theta_e
-                #print(f"Control Actions: omega:{omega_ctrl}, v:{v_ctrl}")
                 await asyncio.sleep(0)
-                #for logging
-                #self._robot.state_estimator.last_v_ctrl = v_ctrl
-                #self._robot.state_estimator.last_omega_ctrl = omega_ctrl
+
                 
                 #transform unicycle-model variables v_ctrl and omega_ctrl to differential-drive
                 #model control variables (angular speed of wheels) 
                 u_L, u_R = self._robot.trsfm_ctrl_outputs(v_ctrl, omega_ctrl)
                 #transform [rad/s] speed to a value the motors can understand (0-6000)
                 u_L, u_R = self._robot.angular_speed_to_motor_speed(u_L), self._robot.angular_speed_to_motor_speed(u_R)
-                #print(f"Motor Speed u_L:{u_L}, u_R:{u_R}")
                 self._robot.motors.set_speeds(u_L, u_R)
-                #print(f'Free Memory {gc.mem_free()}')
                 await asyncio.sleep(0.00)
-                if t % 0.2  < 0.02 and self.logging:
-                    self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index])
-                    #self._robot.state_estimator.past_ctrl_actions.append([v_ctrl, omega_ctrl])  
-                    #self._robot.state_estimator.desired_values.append([self._states[index+1][0],self._states[index+1][1],self._states[index+1][2],self._actions[index][0],self._actions[index][1], t ]) #[x,y,theta,v_ctrl,omega_ctrl]
- 
+                if t % self.logging_interval  < 0.02 and self.logging:
+                    self._robot.state_estimator.past_values.append([t,x, y, theta,v_ctrl, omega_ctrl, index]) 
             except:
                 print('invalid message received')
             
@@ -123,6 +113,7 @@ async def main():
     droneID = int(config['ID'],16)
     logging = int(config['Logging'])
     gains = tuple(config["Gains"])
+    logging_interval = float(config['Logging Interval'])
     max_speed_lvl = int(config["Max Speed"])
     
     rob = Robot(max_speed_lvl=max_speed_lvl)
@@ -135,15 +126,12 @@ async def main():
     except:
         states = data["result"][0]['states']
         ctrl_actions = data["result"][0]["actions"]
-    #gains = tuple((6.5,9.5,5.0))
-    path_duration = len(states)/10    
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
-    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, path_duration=path_duration)
+    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, logging_interval=logging_interval)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
-    # TODO maybe add wait for start_event here 
     await start_event.wait()
     while True:
         await asyncio.sleep(10)
