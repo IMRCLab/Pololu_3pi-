@@ -4,15 +4,16 @@ This repository contains code and resources for the Pololu 3pi+ RP2040 Robot, po
 Repository Structure
 
 - **config/**: Contains configuration files that define various operational parameters for the robot. These configurations influence how different operational modes in the robot's control system behave.
-
 - **trajectories/** : Contains the trajectory files in .json format
+- **Dongle Software/**: Contains the build application for the nrf52840 Dongle
 
 - **control.py**: A core script that manages different operational modes for the robot. This script allows the robot to switch between distinct behaviors depending on user input or pre-defined conditions.
 
-## Configuration Files
+## Configuration
 
 The config/ directory is crucial for customizing the robot's behavior. It contains JSON files that specify parameters such as speed limits, sensor thresholds, and control gains. By modifying these files, users can fine-tune the robot's performance to suit specific tasks or environments.
 Getting Started
+
 ### 1. Setup Instructions
 
 - Connect the Pololu 3pi+ RP2040 to your computer.
@@ -21,9 +22,9 @@ Getting Started
 
 - Download the newest version of the Pololu firmware and load it on to the device
 
-    - Further Instructions https://www.pololu.com/docs/0J86/all#5.1
+  - Further Instructions https://www.pololu.com/docs/0J86/all#5.1
 
-    - Firmware Versions : https://github.com/pololu/micropython-build/releases
+  - Firmware Versions : https://github.com/pololu/micropython-build/releases
 
 - Delete all of the contents from the Micropython folder
 
@@ -38,20 +39,25 @@ Customize the following values
 - ID
 - trajectory
 - Logging
+- Logging Interval
 
 ## Running a Trajectory
 
 To run a trajectory one just needs to start the robot and ensure that the launch script is running that is responsible for the communication with the MoCap.
 The robots running sequence can be divided into the following segments:
-#### Start
+
+### Start
 
 Is the state right after the start of the robot. In this mode the screen should be black. All of the processes are being initialized. The robot is waiting for position information from the robot.
-#### Ready
+
+### Ready
 
 In this mode positional information already has been received, the robot is ready and waiting for the start signal.
 
 Display Output :
+
 ```
+
 READY
 ______
 /|_||_\`.__
@@ -59,13 +65,15 @@ ______
 =`-(_)--(_)-'
 -- --- --- --- -
 READY
+
 ```
-#### Driving
+
+### Driving
 
 The robot received the start signal and starts driving.
 
-Display Output :
 ```
+
 DRIVING...
 ______
 /|_||_\`.__
@@ -73,14 +81,15 @@ ______
 =`-(_)--(_)-'
 -- --- --- --- -
 DRIVING...
+
 ```
-#### Done Driving
+
+### Done Driving
 
 The trajectory is completed, the projected time of the trajectory has been reached.
 
-Display Output :
-
 ```
+
 ----------------
 | ______ |
 | /|_||_\`.__ |
@@ -89,12 +98,13 @@ Display Output :
 ----------------
 DONE DRIVING
 ```
-#### Done Saving
+
+### Done Saving
 
 If Logging is enabled, all available data has been saved to the drive
 
-Display Output :
 ```
+
 ----------------
 | ______ |
 | /|_||_\`.__ |
@@ -115,13 +125,25 @@ A common tool for debugging is the [Thonny](https://thonny.org/) ide. It allows 
 ## Common Issues
 
 ### Pololu Drive in Read Only mode
+
 A quick way to fix this issue is to update the firmware and install the software again.
-### The robot is in Driving Mode but doesnt drive
+
+### Pololu is in Driving Mode but doesnt drive
+
 This usually means that the incoming messages are either decoded incorrectly.
-### Pololu
-## Details 
+
+### Pololu stops mid execution with memory issues
+
+The robot stops because it tries to allocate to much data. To solve this issue one can increase Logging Interval.
+
+## Details
+
 The controller is based on the Collective Intelligence from a Synthetic and Biological Perspective Summer School of which Prof. W. Hönig was one of the organizers. For more information about the differential drive controller
 check out the [/collision_avoidance/slides.pdf](http://modelai.gettysburg.edu/2024/collective/slides/slides.zip) of the slides available on the website.
+
+## Radio Receiver
+
+The code for the  nrf Dongle can be found [here](https://github.com/polyblank-5/esb_prx). The compiled file can be found in the Dongle Software folder.
 
 ## References 
 Collective Intelligence from a Synthetic and Biological Perspective Summer School : http://modelai.gettysburg.edu/2024/collective/
@@ -137,7 +159,6 @@ and adjust the gains (Kx, Ky, Ktheta) you want to use directly with the robot bu
 This code was written for the IMRC Lab of TU Berlin. It is also based on the Collective Intelligence from a Synthetic and Biological Perspective Summer School of which Prof Hönig (IMRC head) was one of the organizers. For more information about the differential drive controler
 check out the /collision_avoidance/slides.pdf of the slides available on the website.
 
-
 To start using my code, simply paste the files "J_controler.py" "J_state_estimator.py" "J_robot.py" "J_maths_module.py", as well as the trajectories folder and the logs folder in the root directory of your 3pi+ robot, alongside all software pre-installed by Pololu.
 (NB in the repo the logs folder contains three examples of data log files and the corresponding pdf containing the plots. These files are not needed for the robot to work, you can delete them. The trajectories folder MUST contain the 3 pre-programmed trajectories though).
 When you turn on your 3pi+ robot, simply select the "J_controler.py" program on the display screen and follow the instructions. (I use Kx = 1, Ky = 3, Ktheta = 3 for my gains).
@@ -151,7 +172,6 @@ After a trajectory is executed, the data will automatically be saved in a .json 
 To plot the data, you can use the script "Plot_Pololu.py". The function plot_all() will automatically create the PDFs of all the logfiles in the logs folder, plotting them in regards to the correct ideal trajectory and naming the resulting PDF following the model of trajectoryname_Kx_Ky_Ktheta.pdf 
 If a PDF with this name already exists (because for example there are multiple runs with the same trajectory and gains) it will a B at the end, as many times as needed. 
 Just make sure to adjust the path given to plot_all() so that it points to the good directory.
-
 
 Encountered issues during the project:
 
