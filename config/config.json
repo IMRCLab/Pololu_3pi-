@@ -4,5 +4,6 @@
     "Logging" : 0,
     "Gains" : [6.5,9.5,5.0],
     "Max Speed" : 6000,
-    "Logging Interval" : 0.2
+    "Logging Interval" : 0.2,
+    "Logging Time" : 10
 }

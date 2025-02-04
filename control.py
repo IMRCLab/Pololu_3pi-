@@ -115,7 +115,8 @@ async def main():
     gains = tuple(config["Gains"])
     logging_interval = float(config['Logging Interval'])
     max_speed_lvl = int(config["Max Speed"])
-    
+    logging_time = float(config['Logging Time'])
+    print(logging_time)
     rob = Robot(max_speed_lvl=max_speed_lvl)
     car = StateDisplay()
     with open("/trajectories/" + trajectory,"r") as f:
@@ -134,7 +135,7 @@ async def main():
         rob.state_estimator.create_logging_file(trajectory,gains)
     await start_event.wait()
     while True:
-        await asyncio.sleep(10)
+        await asyncio.sleep(logging_time)
         if logging:
             if rob.state_estimator.past_values == [] and not control.running():
                 logging = False
