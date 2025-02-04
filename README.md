@@ -11,9 +11,6 @@ Repository Structure
 
 ## Configuration
 
-The config/ directory is crucial for customizing the robot's behavior. It contains JSON files that specify parameters such as speed limits, sensor thresholds, and control gains. By modifying these files, users can fine-tune the robot's performance to suit specific tasks or environments.
-Getting Started
-
 ### 1. Setup Instructions
 
 - Connect the Pololu 3pi+ RP2040 to your computer.
@@ -37,9 +34,23 @@ Modify the configuration files in the config/ folder to customize parameters for
 Customize the following values
 
 - ID
+  - The ID of the robot, usually at the bottom of the frame
 - trajectory
+  - The name of the trajectory file
 - Logging
-- Logging Interval
+  - *1* for Logging *0* for not Logging
+
+There are more values that can be customized but dont need to be for stable performance. They are the following:
+
+- gains
+  - a Tuple with he gains of the robot 
+  - [K<sub>X</sub>,K<sub>Y</sub>,K<sub>Theta</sub>]
+- Logging Time
+  - The difference between saves
+- Logging Intervall
+  - The Interval between saved States
+- Max Speed
+  - max RPM
 
 ## Running a Trajectory
 
@@ -134,7 +145,7 @@ This usually means that the incoming messages are either decoded incorrectly.
 
 ### Pololu stops mid execution with memory issues
 
-The robot stops because it tries to allocate to much data. To solve this issue one can increase Logging Interval.
+The robot stops because it tries to allocate to much data. To solve this issue one can increase Logging Interval or decrease the Logging Time.
 
 ## Details
 
