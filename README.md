@@ -70,8 +70,8 @@ Display Output :
 ```
 
 READY
-______
-/|_||_\`.__
+  ______
+ /|_||_\`.__
 (   _    _ _\ 
 =`-(_)--(_)-'
 -- --- --- --- -
@@ -86,8 +86,8 @@ The robot received the start signal and starts driving.
 ```
 
 DRIVING...
-______
-/|_||_\`.__
+  ______
+ /|_||_\`.__
 (   _    _ _\ 
 =`-(_)--(_)-'
 -- --- --- --- -
@@ -102,9 +102,9 @@ The trajectory is completed, the projected time of the trajectory has been reach
 ```
 
 ----------------
-| ______ |
-| /|_||_\`.__ |
-|( _ _ _\ |
+|  ______      |
+| /|_||_\`.__  |
+|( _ _ _     \ |
 |=`-(_)--(_)-' |
 ----------------
 DONE DRIVING
@@ -117,9 +117,9 @@ If Logging is enabled, all available data has been saved to the drive
 ```
 
 ----------------
-| ______ |
-| /|_||_\`.__ |
-|( _ _ _\ |
+|  ______      |
+| /|_||_\`.__  |
+|( _ _ _     \ |
 |=`-(_)--(_)-' |
 ----------------
 DONE SAVING
