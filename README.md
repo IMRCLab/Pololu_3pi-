@@ -72,7 +72,7 @@ Display Output :
 READY
 ______
 /|_||_\`.__
-( _ _ _
+(   _    _ _\ 
 =`-(_)--(_)-'
 -- --- --- --- -
 READY
@@ -88,7 +88,7 @@ The robot received the start signal and starts driving.
 DRIVING...
 ______
 /|_||_\`.__
-( _ _ _
+(   _    _ _\ 
 =`-(_)--(_)-'
 -- --- --- --- -
 DRIVING...
