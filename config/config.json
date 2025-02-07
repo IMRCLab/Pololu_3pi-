@@ -1,5 +1,5 @@
 {
-    "trajectory" : "unicycle_flatness.json",
+    "trajectory" : ["unicycle_flatness.json","line.json","point.json"],
     "ID" : "0xe7",
     "Logging" : 0,
     "Gains" : [6.5,9.5,5.0],

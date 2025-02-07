@@ -14,9 +14,11 @@ from state_display import StateDisplay
 
 
 class Control():
-    def __init__(self,robot:Robot,first_message:Event, event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay,logging_interval:float) -> None:
+    """ 
+    """
+    def __init__(self,robot:Robot,first_message:Event, start_event:Event, uart_handler:Uart, states:list, actions:list, gains:tuple, logging:bool, car:StateDisplay,logging_interval:float) -> None:
         self._robot = robot
-        self.event = event
+        self.start_event = start_event
         self.first_message = first_message
         self._states_mocap = uart_handler
         self._states = states
@@ -37,7 +39,7 @@ class Control():
         await self.first_message.wait()
         self.car.ready()
 
-        await self.event.wait()
+        await self.start_event.wait()
         
         print('start control')
         self.car.driving()
@@ -109,16 +111,26 @@ from uart import Uart
 async def main():
     with open("/config/config.json","r") as f:
         config = json.load(f)
-    trajectory = config["trajectory"]
+    trajectories = list(config["trajectory"])
     droneID = int(config['ID'],16)
     logging = int(config['Logging'])
     gains = tuple(config["Gains"])
     logging_interval = float(config['Logging Interval'])
     max_speed_lvl = int(config["Max Speed"])
     logging_time = float(config['Logging Time'])
-    print(logging_time)
+    print(f"Logging Time {logging_time}")
     rob = Robot(max_speed_lvl=max_speed_lvl)
     car = StateDisplay()
+    trajectory_event = Event()
+    start_event = Event()
+    first_message_event = Event()
+    connection = Uart(droneID=droneID,first_message=first_message_event,start_event=start_event, trajectory_event=trajectory_event,baudrate=115200)
+    car.waiting_for_trajectory()
+    await trajectory_event.wait()
+    
+    print(f"Trajectory ID: {connection.trajectry_id}")
+    trajectory:str = trajectories[connection.trajectry_id]
+    car.received_trajectory(trajectory)
     with open("/trajectories/" + trajectory,"r") as f:
         data = json.load(f)
     try:
@@ -127,10 +139,8 @@ async def main():
     except:
         states = data["result"][0]['states']
         ctrl_actions = data["result"][0]["actions"]
-    start_event = Event()
-    first_message_event = Event()
-    connection = Uart(droneID=droneID,first_message=first_message_event,event=start_event,baudrate=115200)
-    control = Control(robot=rob,first_message=first_message_event, event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, logging_interval=logging_interval)
+
+    control = Control(robot=rob,first_message=first_message_event, start_event=start_event, uart_handler=connection,states=states,actions=ctrl_actions,gains=gains,logging=bool(logging),car=car, logging_interval=logging_interval)
     if logging:
         rob.state_estimator.create_logging_file(trajectory,gains)
     await start_event.wait()

@@ -7,6 +7,29 @@ class StateDisplay():
     def __init__(self) -> None:
         self.display = robot.Display()
     
+
+    def waiting_for_trajectory(self) -> None:
+        self.display.fill(0)
+        self.display.text("   WAITING FOR ", 0, 0+8)
+        self.display.text("   ______", 0, 0+8+8)
+        self.display.text("  /|_||_\`.__", 0, 8+8+8)
+        self.display.text(" (   _    _ _\ ", 0,16+8+8)
+        self.display.text(" =`-(_)--(_)-'",0,24+8+8)
+        self.display.text("-- --- --- --- -",0,32+8+8)
+        self.display.text("   TRAJECTORY", 0, 32+8+8+8)
+        self.display.show()
+
+    def received_trajectory(self,trajectory:str) -> None:
+        self.display.fill(0)
+        self.display.text("    TRAJECTOY: ", 0, 0+8)
+        self.display.text("   ______", 0, 0+8+8)
+        self.display.text("  /|_||_\`.__", 0, 8+8+8)
+        self.display.text(" (   _    _ _\ ", 0,16+8+8)
+        self.display.text(" =`-(_)--(_)-'",0,24+8+8)
+        self.display.text("-- --- --- --- -",0,32+8+8)
+        self.display.text(f"{trajectory[:-5]}", 0, 32+8+8+8)
+        self.display.show()
+
     def ready(self) -> None:
         self.display.fill(0)
         self.display.text("     READY", 0, 0+8)

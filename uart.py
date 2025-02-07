@@ -8,16 +8,21 @@ from asyncio import Event
 
 
 class Uart():
-    def __init__(self,droneID:int,first_message:Event,event:Event, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
+    """
+    
+    """
+    def __init__(self,droneID:int,first_message:Event,start_event:Event,trajectory_event:Event, baudrate:int = 115200,txPin:int =28, rxPin:int = 29,bits:int=8, parity=None, stop:int=1,rxbuf:int=1000):
         self.uart =  UART(0,baudrate = baudrate, tx=Pin(txPin),rx=Pin(rxPin),bits = bits, parity= parity,stop=stop,rxbuf=rxbuf)
         self.droneID = droneID
-        self.event = event
+        self.start_event = start_event
+        self.trajectry_event:Event = trajectory_event
         self.queue_receive = Queue()
         self.message_decode = tuple()
         self.read = asyncio.create_task(self.read_uart())
         self.decode = asyncio.create_task(self.decode_uart())
         self.first_message = first_message
         self.buffer = bytearray(1)
+        self.trajectry_id:int = 0
 
     async def read_uart(self):
         await asyncio.sleep(1)
@@ -67,8 +72,13 @@ class Uart():
                 #print(buffer)
                 if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
-                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05:
-                    self.event.set()
+                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05 and buffer[3]:
+                    self.trajectry_id = buffer[5]
+                    self.trajectry_event.set()
+                    print('Trajectory has been received')
+                    continue
+                elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05 and not buffer[3]:
+                    self.start_event.set()
                     print('start Event received')
                     continue
                 else :
