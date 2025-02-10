@@ -18,7 +18,7 @@ class Uart():
         self.trajectry_event:Event = trajectory_event
         self.queue_receive = Queue()
         self.message_decode = tuple()
-        self.remote_control_message = tuple()
+        self.remote_control_message = tuple([0,0])
         self.read = asyncio.create_task(self.read_uart())
         self.decode = asyncio.create_task(self.decode_uart())
         self.first_message = first_message

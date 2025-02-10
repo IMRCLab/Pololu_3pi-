@@ -36,10 +36,10 @@ class Control():
         return self._run
     async def control(self)-> None:
         await asyncio.sleep(1)
-        await self.first_message.wait()
+        # await self.first_message.wait()
         self.car.ready()
 
-        await self.start_event.wait()
+        # await self.start_event.wait()
         
         print('start control')
         self.car.driving()
