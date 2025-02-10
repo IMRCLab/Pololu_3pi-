@@ -5,7 +5,7 @@ import micropython
 from primitives.queue import Queue, QueueEmpty
 from quaternion import Quaternion
 from asyncio import Event
-
+from typing import F
 
 class Uart():
     """
@@ -18,6 +18,7 @@ class Uart():
         self.trajectry_event:Event = trajectory_event
         self.queue_receive = Queue()
         self.message_decode = tuple()
+        self.remote_control_message = tuple()
         self.read = asyncio.create_task(self.read_uart())
         self.decode = asyncio.create_task(self.decode_uart())
         self.first_message = first_message
@@ -33,7 +34,7 @@ class Uart():
                     buffer_len = bytearray(1)
                     self.uart.readinto(buffer_len)
                     # print(buffer_len)
-                    if buffer_len[0] in [0x18, 10]:                       
+                    if buffer_len[0] in [0x18, 10,14]:                       
                         new_buffer = bytearray(buffer_len[0])
                         self.uart.readinto(new_buffer)
                         # print(buffer_len + new_buffer)
@@ -63,6 +64,12 @@ class Uart():
         self.message_decode=(x,y,z,quaternion)
         return
 
+    def decode_remote(self,buffer:bytearray)-> None:
+        speed = struct.unpack('<h',buffer[-1])[0]
+        omega = struct.unpack('f',buffer[9:13])[0]
+        self.remote_control_message = (speed,omega)
+        return
+    
     async def decode_uart(self):
         await asyncio.sleep(1)  
         while True:
@@ -93,3 +100,6 @@ class Uart():
 
     def get_position(self) -> tuple:
         return self.message_decode
+    
+    def get_remote_control_message(self) -> tuple:
+        return self.remote_control_message

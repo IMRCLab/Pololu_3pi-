@@ -21,7 +21,7 @@ class StateDisplay():
 
     def received_trajectory(self,trajectory:str) -> None:
         self.display.fill(0)
-        self.display.text("    TRAJECTOY: ", 0, 0+8)
+        self.display.text("    TRAJECTORY: ", 0, 0+8)
         self.display.text("   ______", 0, 0+8+8)
         self.display.text("  /|_||_\`.__", 0, 8+8+8)
         self.display.text(" (   _    _ _\ ", 0,16+8+8)
