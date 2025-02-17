@@ -47,13 +47,13 @@ class Control():
         self._start_time = time.time_ns()
         while self._run:
             try:
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.00)
                 t = time.time_ns() - self._start_time
                 t *= (10**-9)
                 print(t)
                 remote_action = self._states_mocap.get_remote_control_message()
                 print(remote_action)
-                velocity = remote_action[0]/65565*self._robot.max_speed
+                velocity = remote_action[0]/65565*self._robot.max_speed* self._robot.r
                 omega = remote_action[1]
                 print(f"Velocity:{velocity}; Omega:{omega}")
 
@@ -92,8 +92,8 @@ async def main():
     start_event = Event()
     first_message_event = Event()
     connection = Uart(droneID=droneID,first_message=first_message_event,start_event=start_event, trajectory_event=trajectory_event,baudrate=115200)
-    car.waiting_for_trajectory()
-    await trajectory_event.wait()   
+    #car.waiting_for_trajectory()
+    #await trajectory_event.wait()   
 
     control = Control(robot=rob,first_message=first_message_event, start_event=start_event, uart_handler=connection,gains=gains,logging=bool(logging),car=car, logging_interval=logging_interval)
     if logging:

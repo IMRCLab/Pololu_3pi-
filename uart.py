@@ -5,7 +5,6 @@ import micropython
 from primitives.queue import Queue, QueueEmpty
 from quaternion import Quaternion
 from asyncio import Event
-from typing import F
 
 class Uart():
     """
@@ -65,7 +64,7 @@ class Uart():
         return
 
     def decode_remote(self,buffer:bytearray)-> None:
-        speed = struct.unpack('<h',buffer[-1])[0]
+        speed = struct.unpack('<h',buffer[-2:])[0]
         omega = struct.unpack('f',buffer[9:13])[0]
         self.remote_control_message = (speed,omega)
         return
@@ -77,7 +76,9 @@ class Uart():
                 await asyncio.sleep(0.001)
                 buffer = await self.queue_receive.get()
                 #print(buffer)
-                if (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
+                if (buffer[0] & 0xf3) == 0x30: 
+                    self.decode_remote(buffer=buffer)
+                elif (buffer[0] & 0xf3) == 0x61 and buffer[1] == 0x09: 
                     self.decode_message(buffer=buffer)
                 elif (buffer[0] & 0xf3) == 0x80 and buffer[1] == 0x05 and buffer[3]:
                     self.trajectry_id = buffer[5]
