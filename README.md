@@ -133,6 +133,20 @@ It is recommended to use a 50Hz update rate in the MoCap software, higher freque
 
 A common tool for debugging is the [Thonny](https://thonny.org/) ide. It allows for a [simple connection](https://www.pololu.com/docs/0J86/all#5.3) to the MCU on the RP2040 and allows to run programms in the console. For the rest of the development VSC with [MicroPico](https://marketplace.visualstudio.com/items?itemName=paulober.pico-w-go) was used, because of the many usefull tools it has to offer, like code suggestions and git integration.  
 
+## Branches
+
+### 0xe7
+
+This branch now also includes remote trajectory selection functionality.
+
+### remote control
+
+This branch includes the remote control functionality.
+
+### dev
+
+This branch contains code snippets and tests developed during the initial phases of the project.
+
 ## Common Issues
 
 ### Pololu Drive in Read Only mode
