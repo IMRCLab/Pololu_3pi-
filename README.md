@@ -170,6 +170,30 @@ check out the [/collision_avoidance/slides.pdf](http://modelai.gettysburg.edu/20
 
 The code for the  nrf Dongle can be found [here](https://github.com/polyblank-5/esb_prx). The compiled file can be found in the Dongle Software folder.
 
+## Logging
+
+To easily log data on the ground robot, the Crazyflie's Micro SD card deck may be used. The ground robot offers to SPI interfaces: SPI0 which is used to communicate with the onboard Display of the ground robot or SPI1 which is not used. To use the SPI0 interface for logging unplug the display and connect the pins in the following way:
+
+- Ground Robot Expansion Headers <-> CF Expansion Headers
+- 3V3 <-> VCC 3V
+- GND <-> GND
+- GP2 (SPI0 SCK) <-> SCK
+- GP3 (SPI0 TX) <-> MOSI
+- GP1 (SPI0 CS) <-> IO1 to IO 4 (some free IO pin of the CF to do the chip select command for SPI)
+- GP0 (SPI0 RX) <-> MISO
+
+In order to use the SPI1 interface in combination with the SPI0 interface for the display one would connect the pins in the following way:
+
+- Ground Robot Expansion Headers <-> CF Expansion Headers
+- 3V3 <-> VCC 3V
+- GND <-> GND
+- GP24 (SPI1 RX) <-> MISO
+- GP? (one free pin for Chip Select, CS) <-> IO1 to IO 4 (some free IO pin of the CF to do the chip select command for SPI)
+- GP26 (SPI1 SCK) <-> SCK
+- GP27 (SPI1 TX) <-> MOSI
+
+The pins GP28 and GP29 are used to send command from the ground robot to the nrf dongle over UART0. More information on using the SPI interface can be found in the Pololu's user guide, section 6.9 (see reference material in the bottom).
+
 ## References 
 Collective Intelligence from a Synthetic and Biological Perspective Summer School : http://modelai.gettysburg.edu/2024/collective/
 
