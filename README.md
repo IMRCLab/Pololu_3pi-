@@ -168,7 +168,7 @@ check out the [/collision_avoidance/slides.pdf](http://modelai.gettysburg.edu/20
 
 ## Radio Receiver
 
-The code for the  nrf Dongle can be found [here](https://github.com/polyblank-5/esb_prx). The compiled file can be found in the Dongle Software folder.
+The code for the  nrf Dongle can be found in the nrf52840dongle-firmware folder.
 
 ## Logging
 
