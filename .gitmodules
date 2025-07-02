@@ -1,0 +1,3 @@
+[submodule "pololu_ros/deps/crazyflie-link-cpp"]
+	path = pololu_ros/deps/crazyflie-link-cpp
+	url = https://github.com/IMRCLab/crazyflie-link-cpp.git
